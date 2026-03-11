@@ -1,0 +1,61 @@
+{
+  "project":      "PROJECT_NAME",
+  "project_root": "$CF/ClaudeProjects/PROJECT_NAME/",
+  "stack":        "describe tech stack here",
+  "workspace":    "$CF/ClaudeProjects/PROJECT_NAME/agent-workspace/",
+  "manifest":     "$CF/ClaudeProjects/PROJECT_NAME/agent-workspace/manifest.json",
+  "signals":      "$CF/ClaudeProjects/PROJECT_NAME/agent-workspace/signals/",
+  "design_system":"$CF/ClaudeProjects/PROJECT_NAME/DESIGN_SYSTEM.md",
+  "adr":          "$CF/ClaudeProjects/PROJECT_NAME/ADR.md",
+  "agents_enabled": [
+    "planner", "orchestrator", "architect", "design-guardian",
+    "builder-composer", "builder-systems", "builder-data",
+    "builder-integration", "builder-generalist",
+    "tester", "reviewer", "ui-reviewer"
+  ],
+  "git_repo":          "saviranta/PROJECT_NAME",
+  "conventions":       "See PROJECT_NAME/CONVENTIONS.md",
+  "budget_usd":        10.00,
+  "budget_alert_at":   8.00,
+  "agents": {
+    "planner":             { "model": "claude-opus-4-6"   },
+    "orchestrator":        { "model": "claude-sonnet-4-6" },
+    "architect":           { "model": "claude-opus-4-6"   },
+    "researcher":          { "model": "claude-opus-4-6"   },
+    "design-guardian":     { "model": "claude-opus-4-6"   },
+    "builder-composer":    { "model": "claude-sonnet-4-6" },
+    "builder-systems":     { "model": "claude-sonnet-4-6" },
+    "builder-data":        { "model": "claude-sonnet-4-6" },
+    "builder-integration": { "model": "claude-sonnet-4-6" },
+    "builder-generalist":  { "model": "claude-sonnet-4-6" },
+    "tester":              { "model": "claude-sonnet-4-6" },
+    "reviewer":            { "model": "claude-sonnet-4-6" },
+    "ui-reviewer":         { "model": "claude-sonnet-4-6" }
+  },
+  "review_gate": {
+    "reviewer":    "architect",
+    "ui-reviewer": "architect",
+    "security":    "lauri"
+  },
+  "git": {
+    "main_branch":               "main",
+    "branch_prefix":             "agent/",
+    "auto_pr":                   true,
+    "require_approval_before_merge": true,
+    "protected_files": [
+      "schema.prisma",
+      ".env.example",
+      "package.json",
+      "package-lock.json"
+    ]
+  },
+  "ci": {
+    "provider":           "github_actions",
+    "deploy_on_merge_to": "main",
+    "notify":             "lauri"
+  },
+  "regression_scope": {
+    "shared_components":  [],
+    "always_test_pages":  ["/", "/dashboard"]
+  }
+}

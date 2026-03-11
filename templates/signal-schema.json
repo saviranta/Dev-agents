@@ -1,0 +1,17 @@
+{
+  "_comment": "Reference schema for signal files. Watchers write these to agent-workspace/signals/. Orchestrator reads and deletes them.",
+  "_filename_pattern": "[task-id].[status].json  e.g. task-004.done.json",
+  "_valid_statuses": ["done", "reviewed", "failed"],
+
+  "task_id":         "task-004",
+  "agent":           "builder-composer",
+  "status":          "done",
+  "tokens_in":       2840,
+  "tokens_out":      1200,
+  "cost_usd":        0.0043,
+  "started":         "2024-01-15T14:23:00Z",
+  "completed":       "2024-01-15T14:24:12Z",
+  "duration_seconds": 72,
+  "output_file":     "agent-workspace/builder-composer/output/task-004.md",
+  "flags":           ""
+}

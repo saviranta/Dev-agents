@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs / temp
+*.log
+/tmp/
+
+# Nothing from ClaudeProjects should ever end up here,
+# but guard against accidental copies:
+**/manifest.json
+**/run-log.jsonl
+**/quality-log.json
+**/.agent-config.json
+**/signals/
+**/decisions/
+**/output/
+**/PRD.md
+**/ADR.md
+**/CONVENTIONS.md
+**/DESIGN_SYSTEM.md

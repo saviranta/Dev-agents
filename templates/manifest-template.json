@@ -1,0 +1,88 @@
+{
+  "_comment": "Only Orchestrator writes to manifest.json. All other agents read it or drop signal files.",
+  "project":  "PROJECT_NAME",
+  "created":  "ISO_TIMESTAMP",
+  "goal":     "High level goal description",
+  "prd":      "PROJECT_NAME/PRD.md",
+  "adr":      "PROJECT_NAME/ADR.md",
+  "locked_files": {},
+  "tasks": [
+    {
+      "id":          "task-001",
+      "assigned_to": "design-guardian",
+      "status":      "pending",
+      "input":       "Review this UI task and add design constraints before it goes to builder: [task description]. Reference DESIGN_SYSTEM.md.",
+      "depends_on":  [],
+      "branch":      null,
+      "output_file": null,
+      "review_gate": null,
+      "pr_url":      null
+    },
+    {
+      "id":          "task-002",
+      "assigned_to": "builder-systems",
+      "status":      "waiting",
+      "input":       "Create [component/service]. Interface spec: [inputs, outputs, behaviour]. Reference ADR.md for technical approach. Design constraints from task-001 output apply.",
+      "depends_on":  ["task-001"],
+      "branch":      "agent/task-002-component-name",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url":      null
+    },
+    {
+      "id":          "task-003",
+      "assigned_to": "builder-data",
+      "status":      "pending",
+      "input":       "Add [table/migration/query]. Schema spec: [fields, types, constraints, indexes]. Reference ADR.md. schema.prisma may only be modified with explicit Lauri approval: include SCHEMA_CHANGE_APPROVED_BY_LAURI in this spec if approved.",
+      "depends_on":  [],
+      "branch":      "agent/task-003-data-layer",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url":      null
+    },
+    {
+      "id":          "task-004",
+      "assigned_to": "builder-composer",
+      "status":      "waiting",
+      "input":       "Wire [feature] using components from task-002. Do not create new primitives. Design constraints from task-001 apply. Reference ADR.md.",
+      "depends_on":  ["task-002", "task-003"],
+      "branch":      "agent/task-004-feature-name",
+      "output_file": null,
+      "review_gate": null,
+      "pr_url":      null
+    },
+    {
+      "id":          "task-005",
+      "assigned_to": "tester",
+      "status":      "waiting",
+      "input":       "Test task-004 output. Functional tests for [feature]. Check regression_scope pages.",
+      "depends_on":  ["task-004"],
+      "branch":      "agent/task-004-feature-name",
+      "output_file": null,
+      "review_gate": null,
+      "pr_url":      null
+    },
+    {
+      "id":          "task-006",
+      "assigned_to": "ui-reviewer",
+      "status":      "waiting",
+      "input":       "Review task-004 output against DESIGN_SYSTEM.md. Report PASS / DRIFT / BROKEN.",
+      "depends_on":  ["task-004"],
+      "branch":      "agent/task-004-feature-name",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url":      null
+    },
+    {
+      "id":          "task-007",
+      "assigned_to": "reviewer",
+      "status":      "waiting",
+      "input":       "Review code from tasks 002-004 for quality and security. Flag CRITICAL/HIGH security findings for Lauri.",
+      "depends_on":  ["task-004"],
+      "branch":      "agent/task-004-feature-name",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url":      null
+    }
+  ]
+}
