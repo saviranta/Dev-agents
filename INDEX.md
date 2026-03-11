@@ -163,6 +163,16 @@ cd ~/Library/CloudStorage/Dropbox/ClaudeFolder/Agents
 ./shared/init-project.sh PROJECT_NAME
 ```
 
+## Adding Agents to an Existing Project
+
+For projects that existed before the agent system:
+
+```bash
+./shared/add-workspace.sh PROJECT_NAME
+```
+
+Creates only `agent-workspace/` and missing config files. Skips anything already present — safe to re-run. Then fill in `.agent-config.json` with the project's stack, git_repo, and budget.
+
 Then fill:
 1. `.agent-config.json` — set stack, git_repo, budget, regression_scope
 2. `DESIGN_SYSTEM.md` — required before any UI tasks
