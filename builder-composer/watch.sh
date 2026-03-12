@@ -75,6 +75,8 @@ sys.exit(1)
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
   echo "$TASK_INPUT" | claude --model "$MODEL" --print --output-format json \
+    --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
+    --allowedPaths "$PROJECT_ROOT,$WORKSPACE" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
 
