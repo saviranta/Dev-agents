@@ -74,7 +74,8 @@ sys.exit(1)
   RESPONSE_FILE="/tmp/${AGENT}-${TASK_ID}-response.json"
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
-  echo "$TASK_INPUT" | claude --model "$MODEL" --print --output-format json \
+  SAFE_INPUT=$(printf '<task id="%s">\n%s\n</task>' "$TASK_ID" "$TASK_INPUT")
+  echo "$SAFE_INPUT" | claude --model "$MODEL" --print --output-format json \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
     --allowedPaths "$PROJECT_ROOT,$WORKSPACE" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
@@ -104,10 +105,12 @@ SIGEOF
   RESULT=$(python3     -c "import json; print(json.load(open('$RESPONSE_FILE')).get('result',''))"                        2>/dev/null || echo "")
   COST=$(calc_cost "$TOKENS_IN" "$TOKENS_OUT")
 
+  CHANGED_FILES=$(cd "$PROJECT_ROOT" && git diff --name-only HEAD 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+
   echo "$RESULT" > "$OUTPUT_DIR/${TASK_ID}.md"
 
   cat > "$SIGNALS/${TASK_ID}.${SIGNAL_STATUS}.json" << SIGEOF
-{"task_id":"$TASK_ID","agent":"$AGENT","status":"$SIGNAL_STATUS","tokens_in":$TOKENS_IN,"tokens_out":$TOKENS_OUT,"cost_usd":$COST,"started":"$START_TIME","completed":"$COMPLETED","duration_seconds":$DURATION,"output_file":"$WORKSPACE/$AGENT/output/${TASK_ID}.md","flags":""}
+{"task_id":"$TASK_ID","agent":"$AGENT","status":"$SIGNAL_STATUS","tokens_in":$TOKENS_IN,"tokens_out":$TOKENS_OUT,"cost_usd":$COST,"started":"$START_TIME","completed":"$COMPLETED","duration_seconds":$DURATION,"output_file":"$WORKSPACE/$AGENT/output/${TASK_ID}.md","files_changed":"$CHANGED_FILES","flags":""}
 SIGEOF
 
   echo "$(ts) 📤 Signal: ${TASK_ID}.${SIGNAL_STATUS}.json | ${TOKENS_IN}/${TOKENS_OUT} tokens | \$$COST"

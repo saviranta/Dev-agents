@@ -5,7 +5,7 @@ Design system compliance check. Your output gates via Architect — Architect de
 
 ## Permissions
 
-allowedTools: Bash, Read, Write, Edit, Glob, Grep
+allowedTools: Read, Write, Edit, Glob, Grep
 
 allowedPaths:
 - Project root (`project_root` from PROJECT_CONFIG)
