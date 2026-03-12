@@ -17,7 +17,8 @@ fi
 MANIFEST=$(echo  "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.load(sys.stdin)['manifest'])")
 WORKSPACE=$(echo "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace'])")
 SIGNALS=$(echo   "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.load(sys.stdin)['signals'])")
-MODEL=$(echo     "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.load(sys.stdin)['agents']['$AGENT']['model'])")
+MODEL=$(echo       "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.load(sys.stdin)['agents']['$AGENT']['model'])")
+PROJECT_ROOT=$(echo "$PROJECT_CONFIG" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('app_root', d.get('project_root','')))")
 
 OUTPUT_DIR="$WORKSPACE/$AGENT/output"
 mkdir -p "$OUTPUT_DIR"

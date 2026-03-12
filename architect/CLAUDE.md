@@ -64,7 +64,35 @@ Triggered when Orchestrator signals cycle complete.
 { "approved_by": "architect", "timestamp": "ISO_TIMESTAMP", "notes": "..." }
 ```
 
-**If rejecting:** write a structured rejection note for Planner — specific, actionable, root-cause focused. Never fix issues directly — route back through Planner.
+**If rejecting:** write new fix tasks directly — do not edit existing tasks. Drop `signals/cycle.rejected.json` with the new tasks embedded:
+
+```json
+{
+  "rejected_by": "architect",
+  "timestamp": "ISO_TIMESTAMP",
+  "notes": "Root cause summary for Planner",
+  "new_tasks": [
+    {
+      "id": "task-NNN",
+      "assigned_to": "builder-composer",
+      "status": "pending",
+      "input": "Fix: [specific, actionable description referencing ADR and the problem found]. Files: [list]. Expected outcome: [what done looks like].",
+      "depends_on": [],
+      "branch": "agent/task-NNN-fix-description",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url": null
+    }
+  ]
+}
+```
+
+Rules for rejection tasks:
+- Each task must be fully self-contained — a builder with no prior context must complete it from `input` alone
+- Be specific: name the file, the problem, the expected fix. Never write vague tasks like "fix the issues"
+- Assign the correct builder specialisation — do not default to generalist if a specialist fits
+- Orchestrator will append these tasks to the manifest automatically and activate them
+- Never edit existing task entries in the manifest
 
 ---
 

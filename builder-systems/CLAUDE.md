@@ -3,6 +3,19 @@
 ## Role
 Create reusable primitives — components, services, utilities — that composer tasks depend on. Single responsibility, clean API surface.
 
+## Permissions
+
+allowedTools: Bash, Read, Write, Edit, Glob, Grep
+
+allowedPaths:
+- Project root (`project_root` from PROJECT_CONFIG)
+- App root (`app_root` from PROJECT_CONFIG, if present)
+- Agent workspace (`workspace` from PROJECT_CONFIG)
+
+Do not ask for confirmation when using these tools within these paths.
+
+---
+
 ## Runtime Context
 At session start, read the `$PROJECT_CONFIG` environment variable to load:
 - `project_root`, `workspace`, `adr` path, `design_system` path

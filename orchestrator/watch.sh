@@ -215,7 +215,47 @@ PYEOF
     echo ""
   fi
 
-  # ── 6. GIT / PR WORKFLOW (triggered by Architect approval signal) ────────────
+  # ── 6a. ARCHITECT REJECTION — append new fix tasks to manifest ──────────────
+  REJECTION="$SIGNALS/cycle.rejected.json"
+  if [ -f "$REJECTION" ]; then
+    echo "$(ts) 🔁 Architect rejection received — appending fix tasks to manifest"
+
+    python3 << PYEOF
+import json, sys
+from datetime import datetime, timezone
+
+with open("$REJECTION") as f:
+    rejection = json.load(f)
+
+new_tasks = rejection.get("new_tasks", [])
+if not new_tasks:
+    print("  No new tasks in rejection signal — nothing to append")
+    sys.exit(0)
+
+with open("$MANIFEST") as f:
+    m = json.load(f)
+
+existing_ids = {t["id"] for t in m["tasks"]}
+appended = []
+for task in new_tasks:
+    if task["id"] in existing_ids:
+        print(f"  Skipping duplicate task id: {task['id']}")
+        continue
+    m["tasks"].append(task)
+    appended.append(task["id"])
+
+with open("$MANIFEST", "w") as f:
+    json.dump(m, f, indent=2)
+
+notes = rejection.get("notes", "")
+print(f"  Appended {len(appended)} fix task(s): {', '.join(appended)}")
+print(f"  Architect notes: {notes}")
+PYEOF
+
+    rm -f "$REJECTION"
+  fi
+
+  # ── 6b. GIT / PR WORKFLOW (triggered by Architect approval signal) ───────────
   APPROVAL="$SIGNALS/cycle.approved.json"
   if [ -f "$APPROVAL" ]; then
     echo "$(ts) 🔀 Architect approval received — triggering git/PR workflow"

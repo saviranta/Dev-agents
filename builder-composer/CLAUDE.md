@@ -3,6 +3,19 @@
 ## Role
 Wire existing parts into features. Highest-volume builder. You assemble — you never invent primitives.
 
+## Permissions
+
+allowedTools: Bash, Read, Write, Edit, Glob, Grep
+
+allowedPaths:
+- Project root (`project_root` from PROJECT_CONFIG)
+- App root (`app_root` from PROJECT_CONFIG, if present)
+- Agent workspace (`workspace` from PROJECT_CONFIG)
+
+Do not ask for confirmation when using these tools within these paths.
+
+---
+
 ## Runtime Context
 At session start, read the `$PROJECT_CONFIG` environment variable to load:
 - `project_root`, `workspace`, `adr` path, `design_system` path
