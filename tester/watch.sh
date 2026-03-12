@@ -77,7 +77,7 @@ sys.exit(1)
   SAFE_INPUT=$(printf '<task id="%s">\n%s\n</task>' "$TASK_ID" "$TASK_INPUT")
   echo "$SAFE_INPUT" | claude --model "$MODEL" --print --output-format json \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
-    --allowedPaths "$PROJECT_ROOT,$WORKSPACE" \
+    --add-dir "$PROJECT_ROOT" "$WORKSPACE" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
 
