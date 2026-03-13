@@ -94,6 +94,27 @@ Rules for rejection tasks:
 - Orchestrator will append these tasks to the manifest automatically and activate them
 - Never edit existing task entries in the manifest
 
+**Task size rules — apply these when writing fix tasks:**
+
+Target: **1–3 files created or significantly modified per task**, one logical layer, one verifiable outcome.
+
+Split a fix task when it:
+- Touches more than 3 files
+- Spans more than one logical layer (data model, API route, and UI component are three separate tasks)
+- Has two distinct "done" states that could be independently verified
+- Requires the builder to read more than ~6 existing files just to understand context
+- Belongs to more than one builder specialisation
+
+Do not split when:
+- Files are tightly coupled and cannot be built or tested independently
+- The split would produce a task so small it is a single function or trivial rename
+
+A fix task is right-sized if:
+1. "Done" can be described in 2–3 sentences without losing precision
+2. A builder failing on it produces a locatable, specific failure — not "something is broken"
+3. It touches one concern: either data, or logic, or UI — not all three
+4. The `input` field fits in a paragraph — if it needs sub-headings, it is too large
+
 ---
 
 ## Output Format — Trace Block

@@ -34,11 +34,37 @@ Save PRD to `project_root/PRD.md`.
 ## Task Writing Rules
 - Each task must be **fully self-contained** — a fresh Claude session with no prior context must be able to complete it from the task `input` alone
 - Include: what to build, relevant file paths, interface contracts, design constraints, ADR reference
-- Size tasks for a single agent session — not too granular (one function), not too broad (entire feature)
 - Maximise parallelism — minimise `depends_on` chains; tasks that don't share files should run simultaneously
 - Always insert a **Design Guardian** task before any builder task that touches UI
 - Always insert a **UI Reviewer** + **Tester** task after every builder task
 - Always insert a **Reviewer** task covering the full cycle before Architect reviews
+
+## Task Size Rules
+
+Target: **1–3 files created or significantly modified per task**, one logical layer, one verifiable outcome.
+
+**Split a task when it:**
+- Creates or substantially modifies more than 3 files
+- Spans more than one logical layer (e.g. data model + API route + UI component — that is three tasks)
+- Has two distinct "done" states that could be independently verified
+- Requires a builder to read more than ~6 existing files just to understand context
+- Belongs to more than one builder specialisation
+
+**Do not split when:**
+- Files are tightly coupled and cannot be built or tested independently (e.g. a Zod schema and its one consumer)
+- The split would create a task so small it is a single function or trivial change
+
+**Right-sized task checklist — a task passes if:**
+1. "Done" can be described in 2–3 sentences without losing precision
+2. A builder failing on it produces a locatable, specific failure — not "something is broken"
+3. It touches one concern: either data, or logic, or UI — not all three
+4. The `input` field fits comfortably in a paragraph — if it needs sub-headings, it is too large
+
+**Examples:**
+- ✅ `Build UserCard component` — one component, one file, one outcome
+- ✅ `Add /api/users route handler` — one route file, one concern
+- ❌ `Build user management feature` — spans DB schema + API + UI = three tasks
+- ❌ `Implement authentication` — far too broad; split into: schema, session logic, login UI, protected route wrapper
 
 ## Builder Assignment Decision Tree
 1. Touches schema, migrations, or queries? → `builder-data`
