@@ -83,9 +83,11 @@ sys.exit(1)
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
   SAFE_INPUT=$(printf '<task id="%s">\n%s\n</task>' "$TASK_ID" "$TASK_INPUT")
-  echo "$SAFE_INPUT" | claude --model "$MODEL" --print --output-format json \
+  echo "$SAFE_INPUT" | claude \
+    --model "$MODEL" \
     --allowedTools "Read,Write,Edit,Glob,Grep" \
-    --add-dir "$PROJECT_ROOT" "$WORKSPACE" \
+    --print --output-format json \
+    --add-dir "$PROJECT_ROOT" --add-dir "$WORKSPACE" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
 

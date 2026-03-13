@@ -180,18 +180,37 @@ Then fill:
 
 ---
 
+## Runners
+
+Two runner implementations are available. Each watcher agent has a corresponding script for each:
+
+| File | Runner | Requires |
+|------|--------|----------|
+| `watch.sh` | Claude Code CLI (`claude`) | Claude Code installed |
+| `watch-api.sh` | Anthropic API (`claude-api-runner.py`) | `pip install anthropic` + `ANTHROPIC_API_KEY` |
+
+Interactive agents (Planner, Architect, Design Guardian, Researcher) are always run as Claude Code sessions — no watcher script, no runner choice.
+
+---
+
 ## Launching Agents
 
+**Claude Code runner:**
 ```bash
-./shared/start-project.sh PROJECT_NAME
+./shared/launch-agent.sh AGENT PROJECT_NAME
 ```
 
-Prints one launch command per terminal tab.
+**Anthropic API runner:**
+```bash
+./shared/launch-api-agent.sh AGENT PROJECT_NAME
+```
+
+`start-project.sh` prints one launch command per terminal tab (Claude Code runner by default).
 
 Startup order:
 1. Launch Orchestrator tab (background coordinator — must be running first)
 2. Run Planner → PRD + manifest.json
-3. Run Architect → ADR.md + interface contracts
+3. Run Architect → ADR-phase-N.md + interface contracts
 4. Launch remaining watcher tabs
 
 ---
@@ -201,8 +220,12 @@ Startup order:
 Safe to run multiple instances of the same builder — Orchestrator serialises task activation so two instances never pick up the same task:
 
 ```bash
-./shared/launch-agent.sh builder-composer PROJECT_NAME  # tab A
-./shared/launch-agent.sh builder-composer PROJECT_NAME  # tab B
+./shared/launch-agent.sh builder-composer PROJECT_NAME      # tab A (Claude Code)
+./shared/launch-agent.sh builder-composer PROJECT_NAME      # tab B (Claude Code)
+
+# or with the API runner:
+./shared/launch-api-agent.sh builder-composer PROJECT_NAME  # tab A (API)
+./shared/launch-api-agent.sh builder-composer PROJECT_NAME  # tab B (API)
 ```
 
 ---
@@ -276,16 +299,18 @@ Agents/
   architect/CLAUDE.md
   researcher/CLAUDE.md
   design-guardian/CLAUDE.md
-  builder-composer/CLAUDE.md + watch.sh
-  builder-systems/CLAUDE.md + watch.sh
-  builder-data/CLAUDE.md + watch.sh
-  builder-integration/CLAUDE.md + watch.sh
-  builder-generalist/CLAUDE.md + watch.sh
-  tester/CLAUDE.md + watch.sh
-  reviewer/CLAUDE.md + watch.sh
-  ui-reviewer/CLAUDE.md + watch.sh
+  builder-composer/CLAUDE.md + watch.sh + watch-api.sh
+  builder-systems/CLAUDE.md + watch.sh + watch-api.sh
+  builder-data/CLAUDE.md + watch.sh + watch-api.sh
+  builder-integration/CLAUDE.md + watch.sh + watch-api.sh
+  builder-generalist/CLAUDE.md + watch.sh + watch-api.sh
+  tester/CLAUDE.md + watch.sh + watch-api.sh
+  reviewer/CLAUDE.md + watch.sh + watch-api.sh
+  ui-reviewer/CLAUDE.md + watch.sh + watch-api.sh
   shared/
-    launch-agent.sh     — launches a watcher agent
+    launch-agent.sh     — launches a watcher agent (Claude Code CLI runner)
+    launch-api-agent.sh — launches a watcher agent (Anthropic API runner)
+    claude-api-runner.py — drop-in API replacement for `claude --print --output-format json`
     start-project.sh    — prints all launch commands for a project
     init-project.sh     — initialises project workspace
     cost-report.sh      — prints cost summary

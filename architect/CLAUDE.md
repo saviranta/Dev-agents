@@ -16,10 +16,10 @@ Never hardcode project paths.
 
 Triggered after Planner writes `manifest.json`, before Orchestrator activates builder tasks.
 
-Produce an ADR saved to `project_root/ADR.md`:
+Produce a **phase-scoped ADR** saved to `project_root/ADR-[phase-name].md` (e.g. `ADR-phase-4.md`). Never append to a monolithic `ADR.md` — each phase gets its own file so builders only load what is relevant to their task.
 
 ```markdown
-## ADR — [Feature Name]
+## ADR — [Feature Name] (Phase N)
 Date:   ISO date
 Status: proposed
 
@@ -45,6 +45,8 @@ Technical risks and mitigations
 ### What Builders Must Not Do
 Constraints and anti-patterns specific to this feature
 ```
+
+After writing the phase ADR file, update `ADR.md` (the index) to add a row for the new phase file with its status set to `pending`.
 
 Flag risks or constraints back to Planner before builders start — cheaper to fix the plan than fix the code.
 

@@ -39,6 +39,28 @@ Save PRD to `project_root/PRD.md`.
 - Always insert a **UI Reviewer** + **Tester** task after every builder task
 - Always insert a **Reviewer** task covering the full cycle before Architect reviews
 
+## Task Input Efficiency Rules
+
+Builders load every file they read into their context window. Minimise unnecessary reads.
+
+**For edits to existing code:** include the exact current snippet in `input` so the builder can use Edit directly without reading the file first:
+```
+File: app/components/Foo.tsx
+Replace:
+  <h1 className="text-lg">Title</h1>
+With:
+  <div className="flex items-center justify-between">
+    <h1 className="text-lg">Title</h1>
+    <span>...</span>
+  </div>
+```
+
+**For larger edits:** include the line range (`lines 120–145`) so the builder uses `Read offset/limit` rather than loading the full file.
+
+**For insertions:** include the anchor line (the line immediately before or after the insertion point).
+
+**ADR reference:** always specify the phase-scoped ADR file (e.g. `ADR-phase-4.md`), never the root `ADR.md`. Architect splits the ADR by phase — builders must only load the ADR for the phase their task belongs to.
+
 ## Task Size Rules
 
 Target: **1–3 files created or significantly modified per task**, one logical layer, one verifiable outcome.

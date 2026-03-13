@@ -15,10 +15,14 @@ Project-specific data (task manifests, build outputs, review decisions, cost log
 ## Architecture
 
 ```
-Planner ──► Orchestrator ──► Builder agents ──► Tester ──► Reviewer ──► Architect
-   ▲              │                                                          │
-   └──────────────┴──────────────── feedback loop ──────────────────────────┘
+Planner + Architect ──► Orchestrator ──► Builder agents ──► Tester ──► Reviewer ──► Architect
+        ▲                    │                                                           │
+        └────────────────────┴─────────────────── feedback loop ───────────────────────┘
 ```
+
+**Planning phase:** Planner produces the PRD and task graph; Architect produces the phase-scoped ADR and interface contracts. Both run before any builder task starts.
+
+**Build phase:** Orchestrator activates tasks as dependencies clear. Builders, Tester, and Reviewer run as background watchers. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
 
 **13 agents across two types:**
 
@@ -35,7 +39,16 @@ Communication is file-based: watchers drop JSON signal files to `signals/`; the 
 
 ### 1. Prerequisites
 
+Two runner options — use whichever fits your setup:
+
+**Claude Code runner** (default)
 - [Claude Code CLI](https://claude.ai/claude-code) installed and authenticated
+- `gh` CLI for git/PR automation
+- Python 3.9+
+
+**Anthropic API runner** (no Claude Code CLI required)
+- `pip install anthropic`
+- `export ANTHROPIC_API_KEY=sk-ant-...`
 - `gh` CLI for git/PR automation
 - Python 3.9+
 
@@ -56,13 +69,18 @@ Then fill in the three required files in your project folder:
 
 ### 3. Launch agents
 
-Each agent runs in its own terminal tab:
+Each agent runs in its own terminal tab. Use the launcher that matches your runner:
 
 ```bash
+# Claude Code runner
 ./shared/launch-agent.sh orchestrator     my-project
 ./shared/launch-agent.sh builder-composer my-project
 ./shared/launch-agent.sh tester           my-project
-# ... etc
+
+# Anthropic API runner
+./shared/launch-api-agent.sh orchestrator     my-project
+./shared/launch-api-agent.sh builder-composer my-project
+./shared/launch-api-agent.sh tester           my-project
 ```
 
 ### 4. Monitor progress

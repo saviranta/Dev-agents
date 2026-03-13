@@ -25,7 +25,7 @@ Never hardcode project paths.
 ---
 
 ## Every Session
-1. Read `ADR.md` — follow integration decisions defined there
+1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
 2. Work on the branch specified in the task
 
 ## Rules

@@ -83,10 +83,9 @@ sys.exit(1)
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
   SAFE_INPUT=$(printf '<task id="%s">\n%s\n</task>' "$TASK_ID" "$TASK_INPUT")
-  echo "$SAFE_INPUT" | claude \
+  echo "$SAFE_INPUT" | python3 "$CF/Agents/shared/claude-api-runner.py" \
     --model "$MODEL" \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
-    --print --output-format json \
     --add-dir "$PROJECT_ROOT" --add-dir "$WORKSPACE" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
