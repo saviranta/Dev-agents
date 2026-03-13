@@ -38,8 +38,12 @@ total = 0.0
 with open('$RUN_LOG') as f:
     for line in f:
         line = line.strip()
-        if line:
-            total += json.loads(line).get('cost_usd', 0.0)
+        if not line:
+            continue
+        try:
+            total += float(json.loads(line).get('cost_usd') or 0)
+        except Exception:
+            pass  # skip malformed lines
 print(f'{total:.6f}')
 "
 }
@@ -121,9 +125,25 @@ while true; do
     update_manifest_task_status "$TASK_ID" "$STATUS"
     release_file_locks "$TASK_ID"
 
-    # Append to run-log
-    echo "{\"task_id\":\"$TASK_ID\",\"agent\":\"$AGENT\",\"model\":\"$MODEL\",\"started\":\"$STARTED\",\"completed\":\"$COMPLETED\",\"duration_seconds\":$DURATION,\"status\":\"$STATUS\",\"tokens_in\":$TOKENS_IN,\"tokens_out\":$TOKENS_OUT,\"cost_usd\":$COST,\"project\":\"$PROJECT\"}" \
-      >> "$RUN_LOG"
+    # Append to run-log — use Python json.dumps to prevent None/invalid values
+    python3 -c "
+import json, sys
+entry = {
+    'task_id':          '$TASK_ID',
+    'agent':            '$AGENT',
+    'model':            '$MODEL',
+    'started':          '$STARTED',
+    'completed':        '$COMPLETED',
+    'duration_seconds': int('$DURATION') if '$DURATION'.lstrip('-').isdigit() else 0,
+    'status':           '$STATUS',
+    'tokens_in':        int('$TOKENS_IN') if '$TOKENS_IN'.isdigit() else 0,
+    'tokens_out':       int('$TOKENS_OUT') if '$TOKENS_OUT'.isdigit() else 0,
+    'cost_usd':         float('$COST') if '$COST' else 0.0,
+    'project':          '$PROJECT',
+}
+with open('$RUN_LOG', 'a') as f:
+    f.write(json.dumps(entry) + '\n')
+"
 
     # Save trace if present (thinking agents)
     TRACE=$(echo "$SIGNAL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('trace',''))" 2>/dev/null)
