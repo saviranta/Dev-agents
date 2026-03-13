@@ -21,7 +21,11 @@ MODEL=$(echo       "$PROJECT_CONFIG" | python3 -c "import sys,json; print(json.l
 PROJECT_ROOT=$(echo "$PROJECT_CONFIG" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('app_root', d.get('project_root','')))")
 
 OUTPUT_DIR="$WORKSPACE/$AGENT/output"
-mkdir -p "$OUTPUT_DIR"
+STATUS_DIR="$WORKSPACE/status"
+mkdir -p "$OUTPUT_DIR" "$STATUS_DIR"
+
+# Write initial idle status
+python3 -c "import json; open('$STATUS_DIR/$AGENT.json','w').write(json.dumps({'agent':'$AGENT','status':'idle','task_id':None,'started':None,'input_preview':None}))"
 
 echo "🤖 $AGENT watching for pending tasks (model: $MODEL)"
 echo "   Manifest: $MANIFEST"
@@ -71,6 +75,10 @@ sys.exit(1)
   START_TIME=$(ts)
   START_EPOCH=$(date +%s)
 
+  # Write running status
+  INPUT_PREVIEW=$(echo "$TASK_INPUT" | head -c 120 | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().strip()))")
+  python3 -c "import json; open('$STATUS_DIR/$AGENT.json','w').write(json.dumps({'agent':'$AGENT','status':'running','task_id':'$TASK_ID','started':'$START_TIME','input_preview':$INPUT_PREVIEW}))"
+
   RESPONSE_FILE="/tmp/${AGENT}-${TASK_ID}-response.json"
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
@@ -96,6 +104,7 @@ EOF
     cat > "$SIGNALS/${TASK_ID}.failed.json" << SIGEOF
 {"task_id":"$TASK_ID","agent":"$AGENT","status":"failed","tokens_in":0,"tokens_out":0,"cost_usd":0,"started":"$START_TIME","completed":"$COMPLETED","duration_seconds":$DURATION,"output_file":"$OUTPUT_DIR/${TASK_ID}.md","flags":"exit_$CLAUDE_EXIT"}
 SIGEOF
+    python3 -c "import json; open('$STATUS_DIR/$AGENT.json','w').write(json.dumps({'agent':'$AGENT','status':'idle','task_id':None,'started':None,'input_preview':None,'last_task_id':'$TASK_ID','last_status':'failed','last_completed':'$COMPLETED'}))"
     echo "$(ts) ❌ $TASK_ID failed (exit $CLAUDE_EXIT)"
     sleep 30; continue
   fi
@@ -113,6 +122,7 @@ SIGEOF
 {"task_id":"$TASK_ID","agent":"$AGENT","status":"$SIGNAL_STATUS","tokens_in":$TOKENS_IN,"tokens_out":$TOKENS_OUT,"cost_usd":$COST,"started":"$START_TIME","completed":"$COMPLETED","duration_seconds":$DURATION,"output_file":"$WORKSPACE/$AGENT/output/${TASK_ID}.md","files_changed":"$CHANGED_FILES","flags":""}
 SIGEOF
 
+  python3 -c "import json; open('$STATUS_DIR/$AGENT.json','w').write(json.dumps({'agent':'$AGENT','status':'idle','task_id':None,'started':None,'input_preview':None,'last_task_id':'$TASK_ID','last_status':'$SIGNAL_STATUS','last_completed':'$COMPLETED'}))"
   echo "$(ts) 📤 Signal: ${TASK_ID}.${SIGNAL_STATUS}.json | ${TOKENS_IN}/${TOKENS_OUT} tokens | \$$COST"
   sleep 30
 done
