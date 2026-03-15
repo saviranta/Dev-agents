@@ -86,7 +86,7 @@ sys.exit(1)
   echo "$SAFE_INPUT" | python3 "$CF/Agents/shared/claude-api-runner.py" \
     --model "$MODEL" \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
-    --add-dir "$PROJECT_ROOT" --add-dir "$WORKSPACE" \
+\
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
 

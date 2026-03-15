@@ -57,3 +57,7 @@ Location | Expected | Found | Severity
 ```
 
 Drop `signals/[task-id].reviewed.json`. Never write to `manifest.json`.
+
+## Git — Strictly Prohibited
+Never run any git commands. Do not `git add`, `git commit`, `git push`, `git checkout`, or create branches.
+All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval.

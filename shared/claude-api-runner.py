@@ -27,6 +27,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
@@ -194,14 +195,16 @@ def execute_tool(name: str, inputs: dict) -> str:
         elif name == "Read":
             file_path = inputs["file_path"]
             offset = max(1, inputs.get("offset") or 1)
-            limit = inputs.get("limit")
+            limit = inputs.get("limit") or 200  # default cap: 200 lines
             try:
                 with open(file_path, "r", encoding="utf-8", errors="replace") as f:
                     lines = f.readlines()
                 start = offset - 1
-                end = start + limit if limit else len(lines)
+                end = start + limit
                 selected = lines[start:end]
                 result = "".join(f"{start + i + 1}\t{line}" for i, line in enumerate(selected))
+                if end < len(lines):
+                    result += f"\n[... file has {len(lines)} lines total; use offset/limit to read more]"
                 return result or "(empty file)"
             except FileNotFoundError:
                 return f"Error: File not found: {file_path}"
@@ -249,9 +252,14 @@ def execute_tool(name: str, inputs: dict) -> str:
         elif name == "Glob":
             pattern = inputs["pattern"]
             search_path = inputs.get("path") or "."
+            EXCLUDE_DIRS = {"node_modules", ".next", ".git", "dist", "build", ".turbo"}
             try:
                 full_pattern = os.path.join(search_path, pattern)
                 matches = glob_module.glob(full_pattern, recursive=True)
+                matches = [
+                    p for p in matches
+                    if not any(part in EXCLUDE_DIRS for part in Path(p).parts)
+                ]
                 matches.sort(key=lambda p: os.path.getmtime(p) if os.path.exists(p) else 0, reverse=True)
                 return "\n".join(matches) if matches else "(no matches)"
             except Exception as e:
@@ -265,7 +273,7 @@ def execute_tool(name: str, inputs: dict) -> str:
             case_insensitive = inputs.get("-i", False)
             context = inputs.get("context", 0)
 
-            cmd = ["rg", "--no-messages"]
+            cmd = ["rg", "--no-messages", "--glob", "!node_modules/**", "--glob", "!.next/**", "--glob", "!.git/**", "--glob", "!dist/**"]
             if case_insensitive:
                 cmd.append("-i")
             if output_mode == "files_with_matches":
@@ -287,7 +295,7 @@ def execute_tool(name: str, inputs: dict) -> str:
                 return "(no matches)"
             else:
                 # Fallback: grep
-                gcmd = ["grep", "-r"]
+                gcmd = ["grep", "-r", "--exclude-dir=node_modules", "--exclude-dir=.next", "--exclude-dir=.git", "--exclude-dir=dist"]
                 if case_insensitive:
                     gcmd.append("-i")
                 if output_mode == "files_with_matches":
@@ -325,22 +333,47 @@ total_input_tokens = 0
 total_output_tokens = 0
 final_result = ""
 MAX_TURNS = 80
+MAX_TOOL_OUTPUT_CHARS = 8000   # cap any single tool result (~2k tokens)
+MAX_HISTORY_PAIRS = 10         # keep at most this many assistant+tool_result pairs in history
+
+def trim_tool_output(output: str) -> str:
+    if len(output) <= MAX_TOOL_OUTPUT_CHARS:
+        return output
+    half = MAX_TOOL_OUTPUT_CHARS // 2
+    return output[:half] + f"\n... [truncated {len(output) - MAX_TOOL_OUTPUT_CHARS} chars] ...\n" + output[-half:]
+
+def trim_messages(msgs: list) -> list:
+    """Keep the original user prompt + the most recent MAX_HISTORY_PAIRS exchange pairs."""
+    if len(msgs) <= 1 + MAX_HISTORY_PAIRS * 2:
+        return msgs
+    return [msgs[0]] + msgs[-(MAX_HISTORY_PAIRS * 2):]
 
 for turn in range(MAX_TURNS):
     kwargs = {
         "model": args.model,
         "max_tokens": 8192,
-        "messages": messages,
+        "messages": trim_messages(messages),
     }
     if system_prompt:
         kwargs["system"] = system_prompt
     if TOOL_DEFINITIONS:
         kwargs["tools"] = TOOL_DEFINITIONS
 
-    try:
-        response = client.messages.create(**kwargs)
-    except anthropic.APIError as e:
-        print(f"API error: {e}", file=sys.stderr)
+    # Retry on 429 rate limit with exponential backoff (max 5 attempts)
+    response = None
+    for attempt in range(5):
+        try:
+            response = client.messages.create(**kwargs)
+            break
+        except anthropic.RateLimitError as e:
+            wait = 60 * (2 ** attempt)  # 60s, 120s, 240s, 480s, 960s
+            print(f"  [rate_limit] attempt {attempt+1}/5 — waiting {wait}s: {e}", file=sys.stderr)
+            time.sleep(wait)
+        except anthropic.APIError as e:
+            print(f"API error: {e}", file=sys.stderr)
+            sys.exit(1)
+    if response is None:
+        print("API error: rate limit exceeded after 5 retries", file=sys.stderr)
         sys.exit(1)
 
     total_input_tokens += response.usage.input_tokens
@@ -373,6 +406,10 @@ for turn in range(MAX_TURNS):
             })
 
     if tool_results:
+        # Cap each tool result before storing
+        for r in tool_results:
+            if isinstance(r.get("content"), str):
+                r["content"] = trim_tool_output(r["content"])
         messages.append({"role": "user", "content": tool_results})
     else:
         break  # tool_use stop_reason but no tool_use blocks — shouldn't happen

@@ -59,3 +59,7 @@ HIGH     | ...      | ...
 ```
 
 Drop `signals/[task-id].done.json` if tests pass/partial, `signals/[task-id].failed.json` if critical failures. Never write to `manifest.json`.
+
+## Git — Strictly Prohibited
+Never run any git commands. Do not `git add`, `git commit`, `git push`, `git checkout`, or create branches.
+All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval.

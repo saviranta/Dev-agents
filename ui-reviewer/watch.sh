@@ -87,7 +87,7 @@ sys.exit(1)
     --model "$MODEL" \
     --allowedTools "Read,Write,Edit,Glob,Grep" \
     --print --output-format json \
-    --add-dir "$PROJECT_ROOT" --add-dir "$WORKSPACE" \
+    --add-dir "$PROJECT_ROOT" \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?
 

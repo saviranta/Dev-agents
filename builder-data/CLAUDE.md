@@ -60,3 +60,7 @@ Any issues, blockers, schema changes that need Lauri review
 ```
 
 Then drop signal file to `signals/[task-id].done.json` (or `failed`). Never write to `manifest.json`.
+
+## Git — Strictly Prohibited
+Never run any git commands. Do not `git add`, `git commit`, `git push`, `git checkout`, or create branches.
+All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval.
