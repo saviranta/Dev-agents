@@ -24,9 +24,13 @@ Never hardcode project paths.
 
 ---
 
-## Every Session
-1. Read `DESIGN_SYSTEM.md` — do not proceed without it
-2. Compare builder output against design system
+## Every Session — Read Discipline
+1. Read `DESIGN_SYSTEM.md` — do not proceed without it.
+2. Read each builder output file listed under `Builder outputs:` in your task input.
+3. Extract the `Files Modified` (or `Files Created/Modified`) list from each output.
+4. Read ONLY those files from the project — no other reads, no Glob, no Grep.
+
+Do not read files not derived from step 3. Compare only the listed files against the design system.
 
 ## Verdicts
 - **PASS** — fully compliant

@@ -35,6 +35,33 @@ Communication is file-based: watchers drop JSON signal files to `signals/`; the 
 
 ---
 
+## Context efficiency
+
+Each watcher agent runs as a fresh Claude invocation per task. Token cost is therefore per-task, not per-session. The framework is designed to keep each invocation lean:
+
+**Builder tasks** receive only what they need. Every builder task input must end with a `Files needed:` list — the exact files the builder will read. Builders are instructed to signal `BLOCKED` rather than explore the codebase if a needed file was not listed. This keeps per-task context to ~10–20k tokens regardless of project size.
+
+```
+Files needed:
+- app/components/UserCard.tsx   (modify to add avatar prop)
+- app/lib/types.ts              (read User type definition)
+```
+
+**For edits to short snippets**, include the current code inline in the task input — the builder uses `Edit` directly without reading the file at all, and you can omit it from `Files needed:`.
+
+**Reviewer, tester, and ui-reviewer tasks** use a two-hop approach: their task input lists the builder output files to read; they extract the `Files Modified` list from those outputs and read only those project files. The Planner cannot predict which lines will change, but the builder output always records them.
+
+```
+Builder outputs:
+- agent-workspace/builder-composer/output/task-004.md
+
+Read the `Files Modified` section from the output above, then review only those files.
+```
+
+The project directory is never injected wholesale into any agent — there is no equivalent of "load the whole codebase". All context is explicit and task-scoped.
+
+---
+
 ## Getting started
 
 ### 1. Prerequisites
@@ -118,7 +145,7 @@ INDEX.md             # Full reference documentation
 
 **This framework runs Claude CLI with local file access.** Before using it, understand what it can and cannot do:
 
-- Agents are granted access only to the project root and agent workspace (`--add-dir`) — not your entire filesystem
+- Agents access only the files explicitly listed in their task input (`Files needed:`) — the project directory is not injected automatically
 - Builder agents can run shell commands (`--allowedTools Bash,...`). Review agents (reviewer, ui-reviewer) cannot
 - Task inputs are wrapped in XML delimiters before being passed to Claude to mitigate prompt injection from task content
 - Signal files are JSON written by agents and read by the Orchestrator — validate them if your task inputs come from untrusted sources

@@ -28,6 +28,10 @@ Never hardcode project paths.
 1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
 2. Work on the branch specified in the task
 
+## Read Discipline
+Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
+If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> — not in task spec` and signal `failed`. Do not explore the codebase.
+
 ## Rules — Non-Negotiable
 - **`schema.prisma` is a protected file** — only modify if task input contains the exact flag: `SCHEMA_CHANGE_APPROVED_BY_LAURI`
 - **Migrations must be safe** — never destructive without explicit `DESTRUCTIVE_APPROVED` flag in task input

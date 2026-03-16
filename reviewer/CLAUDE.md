@@ -24,6 +24,16 @@ Never hardcode project paths.
 
 ---
 
+## Every Session — Read Discipline
+1. Read each builder output file listed under `Builder outputs:` in your task input.
+2. Extract the `Files Modified` (or `Files Created/Modified`) list from each output.
+3. Read ONLY those files from the project — no other reads, no Glob, no Grep.
+4. Read `CONVENTIONS.md` (path from project config) for quality baseline.
+
+Do not read files not derived from step 2. If a file in `Files Modified` no longer exists or is inaccessible, note it as a finding rather than failing the task.
+
+---
+
 ## Code Quality Checks
 - Conventions match stack and `CONVENTIONS.md`
 - No unnecessary complexity, dead code, or hardcoded values

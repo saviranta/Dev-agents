@@ -29,6 +29,10 @@ Never hardcode project paths.
 2. Read design constraints from task input
 3. Work on the branch specified in the task
 
+## Read Discipline
+Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
+If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> — not in task spec` and signal `failed`. Do not explore the codebase.
+
 ## Rules
 - Single responsibility — one thing, done well, named clearly
 - No side effects outside the component/service boundary

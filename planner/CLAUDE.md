@@ -41,9 +41,17 @@ Save PRD to `project_root/PRD.md`.
 
 ## Task Input Efficiency Rules
 
-Builders load every file they read into their context window. Minimise unnecessary reads.
+Builders load only what you give them — there is no project directory injected automatically. Every file a builder needs must be either included inline in `input` or listed under `Files needed:`.
 
-**For edits to existing code:** include the exact current snippet in `input` so the builder can use Edit directly without reading the file first:
+**Every builder task input MUST end with:**
+```
+Files needed:
+- path/to/file.ts          (reason: e.g. "modify existing handler")
+- path/to/other-file.ts    (reason: e.g. "read interface contract")
+```
+A builder task without `Files needed:` is incomplete — do not write it.
+
+**For edits to existing code:** include the exact current snippet in `input` so the builder can use Edit directly without reading the file first (and remove that file from `Files needed:`):
 ```
 File: app/components/Foo.tsx
 Replace:
@@ -60,6 +68,16 @@ With:
 **For insertions:** include the anchor line (the line immediately before or after the insertion point).
 
 **ADR reference:** always specify the phase-scoped ADR file (e.g. `ADR-phase-4.md`), never the root `ADR.md`. Architect splits the ADR by phase — builders must only load the ADR for the phase their task belongs to.
+
+**For reviewer, ui-reviewer, and tester tasks:** do NOT list source files directly. Instead, list the builder output files and instruct the agent to derive the file list from them:
+```
+Builder outputs:
+- agent-workspace/builder-systems/output/task-002.md
+- agent-workspace/builder-composer/output/task-004.md
+
+Read the `Files Modified` section in each output above, then review only those files.
+```
+This ensures reviewer/tester scope is always derived from actual builder output, not Planner's prediction.
 
 ## Task Size Rules
 

@@ -24,10 +24,13 @@ Never hardcode project paths.
 
 ---
 
-## Every Session
-1. Read `regression_scope` from project config
-2. Run functional tests for the task scope
-3. If builder touched a shared component: test all `always_test_pages`
+## Every Session — Read Discipline
+1. Read each builder output file listed under `Builder outputs:` in your task input.
+2. Extract the `Files Modified` (or `Files Created/Modified`) list from each output — these define the test scope.
+3. Read ONLY the test files directly related to those modified files, plus the modified files themselves if needed to understand behaviour.
+4. Run functional tests for the task scope. If a builder touched a shared component: also run `always_test_pages` from `regression_scope`.
+
+Do not read, Glob, or Grep files unrelated to the scope established in step 2.
 
 ## Rules
 - Use Playwright for visual regression where configured: screenshot before/after, diff, flag changes outside task scope

@@ -29,6 +29,10 @@ Never hardcode project paths.
 2. Read design constraints from task input (Design Guardian output)
 3. Work on the branch specified in the task
 
+## Read Discipline
+Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
+If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> — not in task spec` and signal `failed`. Do not explore the codebase.
+
 ## Rules
 - Assemble features from existing components, services, and APIs only
 - If something needed does not exist: write `BLOCKED` note with specific missing primitive — do not create it
