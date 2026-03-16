@@ -126,20 +126,36 @@ Each agent runs in its own terminal tab. Use the launcher that matches your runn
 ## Repository structure
 
 ```
-shared/              # Shared scripts (launch, dashboard, init)
-templates/           # Project config and manifest templates
-orchestrator/        # Coordination engine
-planner/             # Task decomposition (interactive)
-architect/           # Quality gate and review (interactive)
-researcher/          # Research and ADR generation (interactive)
-design-guardian/     # Design constraint extraction (interactive)
-builder-composer/    # Feature assembly (watcher)
-builder-systems/     # Reusable primitives (watcher)
-builder-data/        # Schema and data layer (watcher)
-builder-integration/ # External APIs and services (watcher)
-builder-generalist/  # Fallback builder (watcher)
-tester/              # E2E test execution, once per composer task (watcher)
-reviewer/            # Code and security review (watcher)
+shared/
+  launch-agent.sh       # Launch a watcher agent (Claude Code CLI runner)
+  launch-api-agent.sh   # Launch a watcher agent (Anthropic API runner)
+  claude-api-runner.py  # API drop-in replacement for claude --print
+  init-project.sh       # Initialise a new project workspace
+  add-workspace.sh      # Add agent workspace to an existing project
+  start-project.sh      # Print all launch commands for a project
+  dashboard.sh          # Live agent status dashboard
+  cost-report.sh        # Per-agent token and cost summary
+  costs.json            # Model pricing table
+
+templates/
+  project-config-template.json  # .agent-config.json starter
+  manifest-template.json        # manifest.json starter with example tasks
+  design-system-template.md     # DESIGN_SYSTEM.md starter
+  signal-schema.json            # Signal file schema reference
+  ci.yml                        # GitHub Actions CI starter
+
+orchestrator/        # Coordination engine — sole writer of manifest.json (watcher)
+planner/             # PRD and task graph (interactive)
+architect/           # Technical design + quality gate (interactive)
+researcher/          # External knowledge tasks (interactive)
+design-guardian/     # Design constraints before UI tasks (interactive)
+builder-composer/    # Wires existing parts into features (watcher)
+builder-systems/     # Creates reusable components, services, utilities (watcher)
+builder-data/        # Schema, migrations, queries (watcher)
+builder-integration/ # External APIs, webhooks, third-party services (watcher)
+builder-generalist/  # Fallback for tasks that span specialisations (watcher)
+tester/              # E2E tests, runs once per composer task (watcher)
+reviewer/            # Code quality + security review (watcher)
 ui-reviewer/         # Design system compliance + visual regression (watcher)
 INDEX.md             # Full reference documentation
 ```
