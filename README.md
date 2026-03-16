@@ -101,18 +101,25 @@ Then fill in the three required files in your project folder:
 
 ### 3. Launch agents
 
-Each agent runs in its own terminal tab. Use the launcher that matches your runner:
+Each agent runs in its own terminal tab. Use the launcher that matches your runner — the same command works for all watcher agents:
 
 ```bash
 # Claude Code runner
-./shared/launch-agent.sh orchestrator     my-project
-./shared/launch-agent.sh builder-composer my-project
-./shared/launch-agent.sh tester           my-project
+./shared/launch-agent.sh orchestrator      my-project
+./shared/launch-agent.sh builder-composer  my-project
+./shared/launch-agent.sh builder-systems   my-project
+# ... same pattern for builder-data, builder-integration, builder-generalist, tester, reviewer, ui-reviewer
 
-# Anthropic API runner
+# Anthropic API runner (same agents, different launcher)
 ./shared/launch-api-agent.sh orchestrator     my-project
 ./shared/launch-api-agent.sh builder-composer my-project
-./shared/launch-api-agent.sh tester           my-project
+./shared/launch-api-agent.sh builder-systems  my-project
+# ... same pattern for all remaining watcher agents
+```
+
+To get all launch commands for a project at once:
+```bash
+./shared/start-project.sh my-project
 ```
 
 ### 4. Monitor progress
