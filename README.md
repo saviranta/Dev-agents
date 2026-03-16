@@ -15,14 +15,15 @@ Project-specific data (task manifests, build outputs, review decisions, cost log
 ## Architecture
 
 ```
-Planner + Architect ──► Orchestrator ──► Builder agents ──► Tester ──► Reviewer ──► Architect
-        ▲                    │                                                           │
-        └────────────────────┴─────────────────── feedback loop ───────────────────────┘
+Planner + Architect ──► Orchestrator ──► Builder agents ──► Composer task ──► Tester (E2E)  ──► Architect
+        ▲                    │                │                     │         ──► UI Reviewer ──►    │
+        │                    │           unit tests                 └──────── ──► Reviewer    ──►    │
+        └────────────────────┴──────────────────────────────── feedback loop ───────────────────────┘
 ```
 
 **Planning phase:** Planner produces the PRD and task graph; Architect produces the phase-scoped ADR and interface contracts. Both run before any builder task starts.
 
-**Build phase:** Orchestrator activates tasks as dependencies clear. Builders, Tester, and Reviewer run as background watchers. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
+**Build phase:** Orchestrator activates tasks as dependencies clear. Builders write and run their own unit tests in the same invocation — a failing unit test signals `failed` immediately without waiting for a downstream tester. Once a composer task wires a feature together, the Tester (E2E), Reviewer, and UI Reviewer run in parallel. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
 
 **13 agents across two types:**
 
@@ -57,6 +58,10 @@ Builder outputs:
 
 Read the `Files Modified` section from the output above, then review only those files.
 ```
+
+**Tester** receives explicit E2E test commands in its task input — it does not discover or run unit tests (builders handle those). This keeps tester invocations short and focused on integration behaviour.
+
+**Progress signals:** reviewer, ui-reviewer, and tester work through named parts (e.g. code quality → security for reviewer) and write a progress update to their status file after each part. This keeps the dashboard live during long-running review tasks without requiring orchestrator changes.
 
 The project directory is never injected wholesale into any agent — there is no equivalent of "load the whole codebase". All context is explicit and task-scoped.
 
@@ -133,9 +138,9 @@ builder-systems/     # Reusable primitives (watcher)
 builder-data/        # Schema and data layer (watcher)
 builder-integration/ # External APIs and services (watcher)
 builder-generalist/  # Fallback builder (watcher)
-tester/              # Test execution (watcher)
+tester/              # E2E test execution, once per composer task (watcher)
 reviewer/            # Code and security review (watcher)
-ui-reviewer/         # Design system compliance (watcher)
+ui-reviewer/         # Design system compliance + visual regression (watcher)
 INDEX.md             # Full reference documentation
 ```
 
