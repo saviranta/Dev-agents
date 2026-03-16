@@ -21,7 +21,14 @@ Planner + Architect ──► Orchestrator ──► Builder agents ──► Co
         └────────────────────┴──────────────────────────────── feedback loop ───────────────────────┘
 ```
 
-**Planning phase:** Planner produces the PRD and task graph; Architect produces the phase-scoped ADR and interface contracts. Both run before any builder task starts.
+**Planning phase** runs before any builder task starts and repeats at the start of each new phase:
+
+1. **Planner** writes the PRD — problem, scope, success criteria, constraints.
+2. **Architect** reviews the PRD, produces a high-level ADR (technical approach, key decisions, risks), and flags any improvements back to Planner. Planner updates the PRD if needed.
+3. **Architect** breaks the ADR into logical phases — each phase is a self-contained slice of the system that can be built and reviewed independently.
+4. **Planner** takes the first phase and breaks it down into tasks (manifest.json). The build cycle begins.
+
+Before each subsequent phase starts, Architect reviews whether anything in the new phase requires changes to what was built in the previous phase — interface contracts, data shapes, shared utilities — and flags these before builders begin.
 
 **Build phase:** Orchestrator activates tasks as dependencies clear. Builders write and run their own unit tests in the same invocation — a failing unit test signals `failed` immediately without waiting for a downstream tester. Once a composer task wires a feature together, the Tester (E2E), Reviewer, and UI Reviewer run in parallel. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
 
