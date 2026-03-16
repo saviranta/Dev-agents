@@ -55,7 +55,7 @@
       "id":          "task-005",
       "assigned_to": "tester",
       "status":      "waiting",
-      "input":       "Test task-004 output. Functional tests for [feature]. Check regression_scope pages.\n\nBuilder outputs:\n- agent-workspace/builder-composer/output/task-004.md\n\nRead the `Files Modified` section from the output above, then test only those files and their related test files.",
+      "input":       "E2E tests for [feature] wired in task-004. Run the following suites:\n- npx playwright test tests/e2e/[feature].spec.ts\n\nBuilder outputs:\n- agent-workspace/builder-composer/output/task-004.md\n\nRead `Files Modified` from the output above to confirm scope before running.",
       "depends_on":  ["task-004"],
       "branch":      "agent/task-004-feature-name",
       "output_file": null,

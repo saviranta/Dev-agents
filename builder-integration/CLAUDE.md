@@ -27,6 +27,7 @@ Never hardcode project paths.
 ## Every Session
 1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
 2. Work on the branch specified in the task
+3. Write unit tests for all code you create or modify (mock external calls). Run them. Signal `failed` if any test fails.
 
 ## Read Discipline
 Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
@@ -62,6 +63,9 @@ List any new env vars added (names only, not values)
 
 ### Files Created/Modified
 - path/to/file.ts — what changed
+
+### Tests
+- [test file]: PASS / FAIL — [details]
 
 ### Flags
 Any issues, blockers, or Lauri-attention items

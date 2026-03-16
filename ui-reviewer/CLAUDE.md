@@ -24,13 +24,19 @@ Never hardcode project paths.
 
 ---
 
-## Every Session — Read Discipline
-1. Read `DESIGN_SYSTEM.md` — do not proceed without it.
-2. Read each builder output file listed under `Builder outputs:` in your task input.
-3. Extract the `Files Modified` (or `Files Created/Modified`) list from each output.
-4. Read ONLY those files from the project — no other reads, no Glob, no Grep.
+## Every Session — Parts
 
-Do not read files not derived from step 3. Compare only the listed files against the design system.
+Work through these parts in order. After each part, write progress to `[workspace]/status/ui-reviewer.json`:
+`{"agent":"ui-reviewer","status":"running","task_id":"[id]","progress":{"current_part":"[name]","parts_done":N,"parts_total":3}}`
+
+**Part 1 — Load scope** (parts_done: 1)
+Read `DESIGN_SYSTEM.md` — do not proceed without it. Read each builder output file listed under `Builder outputs:` in your task input. Extract the `Files Modified` (or `Files Created/Modified`) list. Read ONLY those project files — no other reads, no Glob, no Grep.
+
+**Part 2 — Design compliance** (parts_done: 2)
+Run all Checks against the loaded files. Write findings.
+
+**Part 3 — Visual regression** (parts_done: 3)
+Run Playwright: screenshot before/after for each changed UI file, diff, flag changes outside task scope. Write final output file and drop signal.
 
 ## Verdicts
 - **PASS** — fully compliant
@@ -55,6 +61,9 @@ Verdict: PASS / DRIFT / BROKEN
 Location | Expected | Found | Severity
 ---------|----------|-------|----------
 [findings or "Fully compliant"]
+
+### Visual Regression
+- [component]: no change / changed — [description]
 
 ### Summary
 [1–2 sentence summary for Architect]

@@ -24,13 +24,19 @@ Never hardcode project paths.
 
 ---
 
-## Every Session — Read Discipline
-1. Read each builder output file listed under `Builder outputs:` in your task input.
-2. Extract the `Files Modified` (or `Files Created/Modified`) list from each output.
-3. Read ONLY those files from the project — no other reads, no Glob, no Grep.
-4. Read `CONVENTIONS.md` (path from project config) for quality baseline.
+## Every Session — Parts
 
-Do not read files not derived from step 2. If a file in `Files Modified` no longer exists or is inaccessible, note it as a finding rather than failing the task.
+Work through these parts in order. After each part, write progress to `[workspace]/status/reviewer.json`:
+`{"agent":"reviewer","status":"running","task_id":"[id]","progress":{"current_part":"[name]","parts_done":N,"parts_total":3}}`
+
+**Part 1 — Load scope** (parts_done: 1)
+Read each builder output file listed under `Builder outputs:` in your task input. Extract the `Files Modified` (or `Files Created/Modified`) list from each output. Read `CONVENTIONS.md` (path from project config). Read ONLY those project files — no other reads, no Glob, no Grep. If a file no longer exists, note it as a finding.
+
+**Part 2 — Code quality review** (parts_done: 2)
+Run all Code Quality Checks. Write findings.
+
+**Part 3 — Security review** (parts_done: 3)
+Run all Security Checks. Write findings, then write final output file and drop signal.
 
 ---
 

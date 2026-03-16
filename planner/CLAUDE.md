@@ -36,8 +36,9 @@ Save PRD to `project_root/PRD.md`.
 - Include: what to build, relevant file paths, interface contracts, design constraints, ADR reference
 - Maximise parallelism — minimise `depends_on` chains; tasks that don't share files should run simultaneously
 - Always insert a **Design Guardian** task before any builder task that touches UI
-- Always insert a **UI Reviewer** + **Tester** task after every builder task
+- Always insert a **UI Reviewer** task after every builder task that touches UI; insert a **Tester** task after every composer task (not after every builder task)
 - Always insert a **Reviewer** task covering the full cycle before Architect reviews
+- Builders write and run their own unit tests — include the test file path in `Files needed:`; builder-data writes unit tests only (no DB integration tests)
 
 ## Task Input Efficiency Rules
 

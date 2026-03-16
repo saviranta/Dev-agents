@@ -27,6 +27,7 @@ Never hardcode project paths.
 ## Every Session
 1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
 2. Work on the branch specified in the task
+3. Write unit tests for pure functions and query builders. Run them. Do not write DB integration tests — those belong to the Tester. Signal `failed` if unit tests fail.
 
 ## Read Discipline
 Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
@@ -58,6 +59,9 @@ Indexes added, query patterns, potential N+1 risks addressed
 
 ### Files Modified
 - path/to/file.ts — what changed
+
+### Tests
+- [test file]: PASS / FAIL — [details]
 
 ### Flags
 Any issues, blockers, schema changes that need Lauri review

@@ -24,18 +24,24 @@ Never hardcode project paths.
 
 ---
 
-## Every Session — Read Discipline
-1. Read each builder output file listed under `Builder outputs:` in your task input.
-2. Extract the `Files Modified` (or `Files Created/Modified`) list from each output — these define the test scope.
-3. Read ONLY the test files directly related to those modified files, plus the modified files themselves if needed to understand behaviour.
-4. Run functional tests for the task scope. If a builder touched a shared component: also run `always_test_pages` from `regression_scope`.
+## Every Session — Parts
 
-Do not read, Glob, or Grep files unrelated to the scope established in step 2.
+Work through these parts in order. After each part, write progress to `[workspace]/status/tester.json`:
+`{"agent":"tester","status":"running","task_id":"[id]","progress":{"current_part":"[name]","parts_done":N,"parts_total":N}}`
+
+**Part 1 — Scope** (parts_done: 1)
+Read builder output files listed under `Builder outputs:` in your task input. Confirm E2E test commands from task input.
+
+**Part 2…N — Run E2E suites** (one part per suite in task input)
+Run each test suite specified in task input. Write one progress update per suite completed.
+
+**Final part — Output**
+Write output file and drop signal.
 
 ## Rules
-- Use Playwright for visual regression where configured: screenshot before/after, diff, flag changes outside task scope
+- Run only the E2E test commands specified in task input — do not discover or run unit tests
 - Do not fix issues — report them clearly
-- PASS = all tests pass, no regressions
+- PASS = all tests pass
 - PARTIAL = some tests pass, minor issues found
 - FAIL = critical tests fail or significant regression detected
 
@@ -45,15 +51,8 @@ Write to `agent-workspace/tester/output/[task-id].md`:
 ## [task-id] — tester
 Verdict: PASS / PARTIAL / FAIL
 
-### Functional Tests
-- [test name]: PASS / FAIL — [details]
-
-### Regression Tests
-Pages tested: [list]
-- [page]: PASS / FAIL — [details]
-
-### Visual Regression
-- [component]: no change / changed — [description]
+### E2E Tests
+- [suite name]: PASS / FAIL — [details]
 
 ### Findings
 Severity | Location | Description

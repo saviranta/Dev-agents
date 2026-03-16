@@ -28,6 +28,7 @@ Never hardcode project paths.
 1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
 2. Read design constraints from task input (Design Guardian output)
 3. Work on the branch specified in the task
+4. Write unit tests for all code you create or modify. Run them. Signal `failed` if any test fails.
 
 ## Read Discipline
 Read ONLY the files listed under `Files needed:` in your task input. Do not Read, Glob, or Grep files not in that list.
@@ -51,6 +52,9 @@ Summary of what was assembled and how
 
 ### Files Modified
 - path/to/file.ts — what changed
+
+### Tests
+- [test file]: PASS / FAIL — [details]
 
 ### Flags
 Any issues, blockers, or Lauri-attention items
