@@ -25,7 +25,7 @@ Never hardcode project paths.
 ---
 
 ## Every Session
-1. Read `ADR.md` (index) — it lists phase files. Load only the phase ADR file referenced in your task input (e.g. `ADR-phase-4.md`). Do not load other phase files.
+1. Load only the phase ADR file named in your task input (e.g. `ADR-phase-4.md`). Do not read `ADR.md` index — it is never needed and wastes tokens.
 2. Read design constraints from task input
 3. Work on the branch specified in the task
 4. Write unit tests for all code you create or modify. Run them. Signal `failed` if any test fails.

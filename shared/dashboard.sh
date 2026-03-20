@@ -144,14 +144,51 @@ if os.path.exists(manifest_f):
               f"waiting: {counts.get('waiting',0)}  "
               f"failed: {counts.get('failed',0)}")
 
-        # Show pending/running tasks
-        active = [t for t in tasks if t["status"] in ("pending", "in_progress")]
-        if active:
-            print()
-            print(f"  {'QUEUED/ACTIVE':<14} {'TASK':<12} {'ASSIGNED TO':<22} DEPENDS ON")
-            for t in active:
-                deps = ", ".join(t.get("depends_on", [])) or "—"
-                print(f"  {'':14} {t['id']:<12} {t['assigned_to']:<22} {deps}")
+        # Build running-task lookup from status files
+        running_tasks = {}
+        if os.path.exists(status_dir):
+            for fn in sorted(os.listdir(status_dir)):
+                if not fn.endswith(".json"): continue
+                try:
+                    s = json.loads(open(os.path.join(status_dir, fn)).read())
+                    if s.get("status") == "running" and s.get("task_id"):
+                        running_tasks[s["task_id"]] = s["agent"]
+                except:
+                    pass
+
+        # Build cost lookup from run-log
+        task_cost = {}
+        if os.path.exists(run_log_f):
+            with open(run_log_f) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line: continue
+                    try:
+                        entry = json.loads(line)
+                        tid = entry.get("task_id")
+                        if tid:
+                            task_cost[tid] = task_cost.get(tid, 0) + float(entry.get("cost_usd") or 0)
+                    except:
+                        pass
+
+        # Show all tasks in current phase
+        status_order = {"running": 0, "in_progress": 1, "pending": 2, "waiting": 3, "done": 4, "reviewed": 4, "failed": 5}
+        def effective_status(t):
+            return "running" if t["id"] in running_tasks else t["status"]
+        sorted_tasks = sorted(tasks, key=lambda t: (status_order.get(effective_status(t), 9), t["id"]))
+        status_icon_map = {"done": "✅", "reviewed": "✅", "failed": "❌", "running": "⚙️ ", "in_progress": "⚙️ ", "pending": "⏳", "waiting": "💤"}
+        print()
+        print(f"  {'TASK':<14} {'ASSIGNED TO':<22} {'STATUS':<12} {'COST':>7}  DEPENDS ON")
+        print(f"  {'─'*14} {'─'*22} {'─'*12} {'─'*7}  {'─'*20}")
+        for t in sorted_tasks:
+            tid   = t["id"]
+            agent = t.get("assigned_to", "?")
+            st    = effective_status(t)
+            icon  = status_icon_map.get(st, "❓")
+            cost  = task_cost.get(tid, 0)
+            cost_s = f"${cost:.4f}" if cost else "—"
+            deps  = ", ".join(t.get("depends_on", [])) or "—"
+            print(f"  {tid:<14} {agent:<22} {icon} {st:<10} {cost_s:>7}  {deps}")
     except:
         print("  (manifest unreadable)")
 else:

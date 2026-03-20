@@ -86,6 +86,7 @@ sys.exit(1)
   echo "$SAFE_INPUT" | claude \
     --model "$MODEL" \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
+    --max-turns 15 \
     --print --output-format json \
     > "$RESPONSE_FILE" 2>"$ERROR_FILE"
   CLAUDE_EXIT=$?

@@ -47,6 +47,23 @@ Design Guardian — [date]
 
 ---
 
+## Manifest Task Statuses
+
+Valid values (orchestrator only recognises these):
+
+| Status | Meaning |
+|--------|---------|
+| `waiting` | Has unresolved `depends_on` — orchestrator promotes to `pending` when all deps are `done`/`reviewed` |
+| `pending` | No unresolved deps — ready to dispatch |
+| `in_progress` | Orchestrator has activated this task |
+| `done` | Completed successfully (builders, tester pass, design-guardian) |
+| `reviewed` | Reviewed (reviewer, ui-reviewer) |
+| `failed` | Any agent error |
+
+Design Guardian writes `"status": "done"` when its output file is complete. Do not use `"completed"`, `"complete"`, or any other value — the orchestrator will not recognise it.
+
+---
+
 ## New Component or Pattern Requests
 If the task requires a component or pattern not in `DESIGN_SYSTEM.md`:
 1. Flag it clearly — do not invent

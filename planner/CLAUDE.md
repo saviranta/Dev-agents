@@ -42,7 +42,22 @@ Save PRD to `project_root/PRD.md`.
 
 ## Task Input Efficiency Rules
 
+These rules are **hard constraints**. They are not guidelines. They are not overridable by Planner judgment about task complexity. A task that feels complex is not an exception — it is exactly the situation these rules exist for. Violating them causes direct financial damage through unnecessary token spend.
+
 Builders load only what you give them — there is no project directory injected automatically. Every file a builder needs must be either included inline in `input` or listed under `Files needed:`.
+
+### FORBIDDEN phrases — never write these in any task input:
+- "Read the file fully before editing"
+- "Read the current file fully"
+- "Read X fully"
+- "Read and understand X"
+- "Familiarise yourself with X"
+- Any instruction that causes a builder to load an entire file when only part of it is needed
+
+These phrases are banned without exception. Task complexity does not justify them. If you find yourself about to write one, stop — you have not prepared the task correctly. Go back, read the relevant lines yourself, and include only the needed snippet or line range.
+
+### The strict necessity rule — always applied, no exceptions:
+Every file reference in a task input must be justified by strict necessity. Ask: "Does the builder need this exact content to complete the task?" If the answer is "it would be helpful context" or "they need to understand the structure" — that is not strict necessity. Include only what the builder must have to make the specific change. Your model tendency to provide more context to be helpful is overridden by this rule at all times.
 
 **Every builder task input MUST end with:**
 ```
@@ -68,7 +83,10 @@ With:
 
 **For insertions:** include the anchor line (the line immediately before or after the insertion point).
 
-**ADR reference:** always specify the phase-scoped ADR file (e.g. `ADR-phase-4.md`), never the root `ADR.md`. Architect splits the ADR by phase — builders must only load the ADR for the phase their task belongs to.
+**ADR reference:** always specify the phase-scoped ADR file (e.g. `ADR-phase-4.md`) with exact line ranges specific to what that task needs. Never reference the full ADR file, never reference by section name alone. Each task reads only the lines it requires — different tasks reading the same ADR will have different line ranges. Before writing the line range, read the ADR yourself and confirm the lines. Example:
+```
+- ADR-phase-6.md  lines 92–94 (pill-click interaction), 198–215 (constraints)
+```
 
 **For reviewer, ui-reviewer, and tester tasks:** do NOT list source files directly. Instead, list the builder output files and instruct the agent to derive the file list from them:
 ```
@@ -84,6 +102,8 @@ This ensures reviewer/tester scope is always derived from actual builder output,
 
 Target: **1–3 files created or significantly modified per task**, one logical layer, one verifiable outcome.
 
+**Builder agents run with `--max-turns 15`.** A well-specified task must complete within this hard limit. If you cannot fit a task into 15 turns — roughly: 1 turn to read the ADR snippet, 1–3 turns to read/edit files, 1 turn to run tests, 1 turn to write output — the task is too large. Split it. A task that hits the turn limit fails and costs the full context-accumulation price with no output. This is a hard budget constraint, not a guideline.
+
 **Split a task when it:**
 - Creates or substantially modifies more than 3 files
 - Spans more than one logical layer (e.g. data model + API route + UI component — that is three tasks)
@@ -91,9 +111,11 @@ Target: **1–3 files created or significantly modified per task**, one logical 
 - Requires a builder to read more than ~6 existing files just to understand context
 - Belongs to more than one builder specialisation
 
-**Do not split when:**
-- Files are tightly coupled and cannot be built or tested independently (e.g. a Zod schema and its one consumer)
-- The split would create a task so small it is a single function or trivial change
+**Do not split when — narrow exceptions only:**
+- A schema file and its single direct consumer (e.g. a Zod schema + the one function that calls `parse()` on it) — they share a contract that has no meaning in isolation
+- The split would produce a task that is a single function or a trivial change with no independently verifiable outcome
+
+**The coupling exception is NOT a judgment call.** It applies only when the two files literally cannot compile or have a testable output without each other. "They belong to the same feature" does not qualify. "They are related" does not qualify. A new utility + its test + a component that uses it is three separable concerns — split them. A wiring task that connects existing parts is always separable from the parts themselves.
 
 **Right-sized task checklist — a task passes if:**
 1. "Done" can be described in 2–3 sentences without losing precision
@@ -106,6 +128,7 @@ Target: **1–3 files created or significantly modified per task**, one logical 
 - ✅ `Add /api/users route handler` — one route file, one concern
 - ❌ `Build user management feature` — spans DB schema + API + UI = three tasks
 - ❌ `Implement authentication` — far too broad; split into: schema, session logic, login UI, protected route wrapper
+- ❌ `Build contextBar utility + wire ReviewShell + update TracePane` — utility (builder-systems) and wiring (builder-composer) are separable; 5 files is a split signal regardless of feature cohesion
 
 ## Builder Assignment Decision Tree
 1. Touches schema, migrations, or queries? → `builder-data`
