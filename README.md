@@ -32,6 +32,8 @@ Before each subsequent phase starts, Architect reviews whether anything in the n
 
 **Build phase:** Orchestrator activates tasks as dependencies clear. Builders write and run their own unit tests in the same invocation — a failing unit test signals `failed` immediately without waiting for a downstream tester. Once a composer task wires a feature together, the Tester (E2E), Reviewer, and UI Reviewer run in parallel. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
 
+**PR workflow (manual):** When Architect approves a cycle, the Orchestrator prints a notification and waits. You then ask Planner to raise the PR — Planner runs `gh pr create` with a structured title and summary. PRs are never created automatically; Lauri always triggers them.
+
 **13 agents across two types:**
 
 | Type | Agents |
@@ -82,13 +84,13 @@ Two runner options — use whichever fits your setup:
 
 **Claude Code runner** (default)
 - [Claude Code CLI](https://claude.ai/claude-code) installed and authenticated
-- `gh` CLI for git/PR automation
+- `gh` CLI (used by Planner to raise PRs)
 - Python 3.9+
 
 **Anthropic API runner** (no Claude Code CLI required)
 - `pip install anthropic`
 - `export ANTHROPIC_API_KEY=sk-ant-...`
-- `gh` CLI for git/PR automation
+- `gh` CLI (used by Planner to raise PRs)
 - Python 3.9+
 
 ### 2. Set up a project

@@ -275,54 +275,10 @@ PYEOF
     rm -f "$REJECTION"
   fi
 
-  # ── 6b. GIT / PR WORKFLOW (triggered by Architect approval signal) ───────────
+  # ── 6b. ARCHITECT APPROVAL — notify Lauri, PR raised by Planner ─────────────
   APPROVAL="$SIGNALS/cycle.approved.json"
   if [ -f "$APPROVAL" ]; then
-    echo "$(ts) 🔀 Architect approval received — triggering git/PR workflow"
-
-    python3 << PYEOF
-import json, subprocess, sys
-
-with open("$MANIFEST") as f:
-    m = json.load(f)
-
-branches = list({t.get('branch') for t in m['tasks'] if t.get('branch')})
-
-for branch in branches:
-    if not branch:
-        continue
-    # Check if branch exists
-    result = subprocess.run(['git', 'show-ref', '--verify', f'refs/heads/{branch}'],
-                            capture_output=True, cwd="$CF")
-    if result.returncode != 0:
-        print(f"  Skipping {branch} — branch not found")
-        continue
-
-    # Open PR
-    task_ids = [t['id'] for t in m['tasks'] if t.get('branch') == branch]
-    body = f"Agent-generated PR\\n\\nTasks: {', '.join(task_ids)}\\n\\nReviewed by Architect. Merge requires Lauri approval."
-    pr_result = subprocess.run(
-        ['gh', 'pr', 'create',
-         '--title', f'[agent] {branch}',
-         '--body', body,
-         '--base', 'main',
-         '--head', branch],
-        capture_output=True, text=True, cwd="$CF/ClaudeProjects"
-    )
-    if pr_result.returncode == 0:
-        pr_url = pr_result.stdout.strip()
-        print(f"  PR created: {pr_url}")
-        # Update manifest pr_url
-        for task in m['tasks']:
-            if task.get('branch') == branch:
-                task['pr_url'] = pr_url
-    else:
-        print(f"  PR failed for {branch}: {pr_result.stderr[:200]}")
-
-with open("$MANIFEST", 'w') as f:
-    json.dump(m, f, indent=2)
-PYEOF
-
+    echo "$(ts) ✅ Architect approval received — ask Planner to raise the PR"
     rm -f "$APPROVAL"
   fi
 

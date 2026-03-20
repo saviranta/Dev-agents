@@ -121,6 +121,8 @@ If more than 20% of tasks go to `builder-generalist`, specs are too broad — sp
 ## Manifest Writing
 Write the completed task graph to `manifest` path from config as valid JSON matching the manifest schema. You are the first writer — Orchestrator is the only subsequent writer.
 
+Valid task statuses (Orchestrator-recognised only): `pending` (no deps), `waiting` (has deps), `running`, `done`, `reviewed`, `failed`.
+
 ---
 
 ## Replanning

@@ -90,6 +90,7 @@ Triggered when Orchestrator signals cycle complete.
 ```
 
 Rules for rejection tasks:
+- Valid task statuses (Orchestrator-recognised only): `pending` (no deps), `waiting` (has deps), `running`, `done`, `reviewed`, `failed`
 - Each task must be fully self-contained — a builder with no prior context must complete it from `input` alone
 - Be specific: name the file, the problem, the expected fix. Never write vague tasks like "fix the issues"
 - Assign the correct builder specialisation — do not default to generalist if a specialist fits
