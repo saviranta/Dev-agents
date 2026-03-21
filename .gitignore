@@ -46,6 +46,13 @@ status/
 **/CONVENTIONS.md
 **/DESIGN_SYSTEM.md
 
+# ── Agent-SI — instance data (tracked in repo as templates only) ──────────────
+# These files are personal/operational and must not be pushed after initial creation.
+agent-si/system-journal.md
+agent-si/metrics-baseline.md
+agent-si/rfcs/
+agent-si/patterns/
+
 # ── Logs / temp ───────────────────────────────────────────────────────────────
 *.log
 /tmp/
