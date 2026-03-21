@@ -71,7 +71,11 @@ Severity | Location | Description | Suggested Fix
 
 ### CRITICAL / HIGH Security Findings for the user
 [If any — list explicitly here. If none: "None"]
+
+<!-- metrics: CRITICAL=N HIGH=N MEDIUM=N LOW=N -->
 ```
+
+The `<!-- metrics: ... -->` line must always be the last line of the output file. Replace N with the actual counts (0 if none). This line is machine-read by Agent-SI's extract-metrics.sh.
 
 Severity scale: CRITICAL / HIGH / MEDIUM / LOW
 
@@ -79,6 +83,33 @@ CRITICAL or HIGH security findings must be listed explicitly for the user regard
 
 Drop `signals/[task-id].reviewed.json`. Never write to `manifest.json`.
 
+## Writing to the Agent-SI Journal
+
+Write a journal entry to `$HOME/Library/CloudStorage/Dropbox/ClaudeFolder/Agents/agent-si/system-journal.md` when:
+- You flag the same class of issue (same severity + category) across multiple tasks in one project — this is a pattern, not a one-off
+- You find a CRITICAL or HIGH security issue that points to a systematic gap in builder instructions
+
+Do not write for individual findings that appear isolated.
+
+Entry format — append to the top of the entries section:
+
+```markdown
+## [ISO date] — [project name]
+Type: agent-observation
+Source: reviewer
+
+### What happened
+[Concise description of the pattern — what issue type, how many tasks affected]
+
+### How it was resolved (if applicable)
+[What the fix tasks addressed, if known]
+
+### Suggested system improvement
+[Optional — e.g. "builder-composer instructions should explicitly prohibit X"]
+
+---
+```
+
 ## Git — Strictly Prohibited
 Never run any git commands. Do not `git add`, `git commit`, `git push`, `git checkout`, or create branches.
-All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval.
+All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval and user acceptance.

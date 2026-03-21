@@ -39,6 +39,12 @@ Save PRD to `project_root/PRD.md`.
 - Always insert a **UI Reviewer** task after every builder task that touches UI; insert a **Tester** task after every composer task (not after every builder task)
 - Always insert a **Reviewer** task covering the full cycle before Architect reviews
 - Builders write and run their own unit tests — include the test file path in `Files needed:`; builder-data writes unit tests only (no DB integration tests)
+- When scope contracts after prototyping or PRD revision: every task touching related code must include an explicit `Removed from scope:` block. Never assume builders know what was cut — they have no prior context. Example:
+  ```
+  Removed from scope (do NOT implement; delete any stub or prop reference you encounter):
+  - onModifyExcerpt — removed post-proto
+  - onAddExcerpt — removed post-proto
+  ```
 
 ## Task Input Efficiency Rules
 
@@ -110,6 +116,7 @@ Target: **1–3 files created or significantly modified per task**, one logical 
 - Has two distinct "done" states that could be independently verified
 - Requires a builder to read more than ~6 existing files just to understand context
 - Belongs to more than one builder specialisation
+- Combines component creation AND wiring that component into a parent feature — building a primitive is builder-systems; wiring it into a shell or page is builder-composer; these are always two tasks; the coupling exception never applies across agent specialisations
 
 **Do not split when — narrow exceptions only:**
 - A schema file and its single direct consumer (e.g. a Zod schema + the one function that calls `parse()` on it) — they share a contract that has no meaning in isolation
@@ -129,6 +136,7 @@ Target: **1–3 files created or significantly modified per task**, one logical 
 - ❌ `Build user management feature` — spans DB schema + API + UI = three tasks
 - ❌ `Implement authentication` — far too broad; split into: schema, session logic, login UI, protected route wrapper
 - ❌ `Build contextBar utility + wire ReviewShell + update TracePane` — utility (builder-systems) and wiring (builder-composer) are separable; 5 files is a split signal regardless of feature cohesion
+- ❌ `Build StructuredPane + wire into ReviewShell` — component creation and wiring span two specialisations; always split even if the files are adjacent
 
 ## Builder Assignment Decision Tree
 1. Touches schema, migrations, or queries? → `builder-data`
@@ -145,6 +153,45 @@ If more than 20% of tasks go to `builder-generalist`, specs are too broad — sp
 Write the completed task graph to `manifest` path from config as valid JSON matching the manifest schema. You are the first writer — Orchestrator is the only subsequent writer.
 
 Valid task statuses (Orchestrator-recognised only): `pending` (no deps), `waiting` (has deps), `running`, `done`, `reviewed`, `failed`.
+
+### Phase Stamps — Required on Every Task
+Every task object must include a `"phase"` field. No task may be written to manifest without one.
+
+| Value | When to use |
+|-------|-------------|
+| `"initial"` | All tasks in the original plan |
+| `"replan"` | Tasks added after Architect Mode 1 flags risks back to Planner |
+
+Orchestrator sets `"fix"` and `"design"` when appending tasks from its own signals — never set those values yourself.
+
+---
+
+## Writing to the Agent-SI Journal
+
+Write a journal entry to `$HOME/Library/CloudStorage/Dropbox/ClaudeFolder/Agents/agent-si/system-journal.md` when:
+- You have to replan significantly mid-session (Architect Mode 1 flags major risks, scope changes requiring task restructuring)
+- You notice a pattern in how tasks are failing that suggests a spec problem
+
+Do not write for routine planning progress.
+
+Entry format — append to the top of the entries section (below the header, above the closing comment):
+
+```markdown
+## [ISO date] — [project name]
+Type: agent-observation
+Source: planner
+
+### What happened
+[Concise description of what required replanning or what pattern was noticed]
+
+### How it was resolved (if applicable)
+[What you did to address it]
+
+### Suggested system improvement
+[Optional — if a change to Planner or another agent's instructions would prevent this]
+
+---
+```
 
 ---
 

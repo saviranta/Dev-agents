@@ -23,6 +23,7 @@ Agents live globally here. Each project supplies its own `.agent-config.json` an
 | Tester | Watcher | `done` / `failed` | Functional + visual regression |
 | Reviewer | Watcher | `reviewed` | Code quality + security combined |
 | UI Reviewer | Watcher | `reviewed` | Design system compliance |
+| Agent-SI | Interactive | — | Agent system improver — audits metrics, proposes and implements system improvements |
 
 ---
 
@@ -69,15 +70,22 @@ Reviewer         → code quality + security
 Architect (Mode 2 — Quality Gate)
   → reads builder outputs + reviewer reports
   → APPROVE → drops signals/cycle.approved.json
-  → REJECT  → structured feedback to Planner → replan cycle
+  → REJECT  → writes fix tasks into signals/cycle.rejected.json
 
 Orchestrator
-  → receives cycle.approved.json
-  → opens PRs via gh pr create
+  → receives cycle.approved.json → prints banner → prompts user in terminal to test
+  → receives cycle.rejected.json → appends fix tasks to manifest → notifies user → resumes loop
 
 User
-  → reviews CI + PR + reviewer reports
-  → merges → GitHub Actions deploys
+  → tests feature in local/staging environment
+  → reviews Reviewer + UI Reviewer output files in agent-workspace/
+  → returns to Orchestrator terminal → presses Enter to create PRs (or 'skip' to defer)
+
+Orchestrator
+  → user presses Enter → git push + gh pr create for all completed branches → idles
+
+User
+  → reviews CI + PRs → merges → GitHub Actions deploys
 ```
 
 ---
@@ -93,7 +101,8 @@ Signal statuses:
 - `reviewed` — reviewer, ui-reviewer
 - `failed` — any agent on error
 - `manifest.validated.json` — Validator approval (gates Orchestrator task activation)
-- `cycle.approved.json` — Architect approval (special file)
+- `cycle.approved.json` — Architect approval → Orchestrator prompts user in terminal; creates PRs on Enter
+- `cycle.rejected.json` — Architect rejection → Orchestrator appends fix tasks + notifies user + resumes loop
 
 Signals folder should be empty between task completions. Accumulation means Orchestrator stopped.
 
@@ -132,6 +141,7 @@ If >20% of tasks land on `builder-generalist`, task specs are too broad — spli
 | Builder output quality | Architect (cycle approval) |
 | UI compliance | Architect (via UI Reviewer report) |
 | Security CRITICAL/HIGH | User (flagged in Reviewer output) |
+| Feature acceptance + PR creation | User (press Enter in Orchestrator terminal after testing) |
 | PR merge | User always |
 | Deployment | User always (triggered by merge) |
 
@@ -316,6 +326,13 @@ Agents/
   tester/CLAUDE.md + watch.sh + watch-api.sh
   reviewer/CLAUDE.md + watch.sh + watch-api.sh
   ui-reviewer/CLAUDE.md + watch.sh + watch-api.sh
+  agent-si/
+    CLAUDE.md              ← agent instructions
+    system-journal.md      ← append-only record; any agent may write here
+    metrics-baseline.md    ← rolling metric snapshots
+    extract-metrics.sh     ← extracts project metrics to JSON
+    rfcs/                  ← one RFC-NNN.md per improvement proposal
+    PLAN.md                ← design document
   shared/
     preflight.sh        — runs Planner in pre-flight mode (state audit + correction)
     validate-manifest.sh — runs the Validator agent against a project manifest

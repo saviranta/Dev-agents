@@ -3,15 +3,66 @@
   "_filename_pattern": "[task-id].[status].json  e.g. task-004.done.json",
   "_valid_statuses": ["done", "reviewed", "failed"],
 
-  "task_id":         "task-004",
-  "agent":           "builder-composer",
-  "status":          "done",
-  "tokens_in":       2840,
-  "tokens_out":      1200,
-  "cost_usd":        0.0043,
-  "started":         "2024-01-15T14:23:00Z",
-  "completed":       "2024-01-15T14:24:12Z",
-  "duration_seconds": 72,
-  "output_file":     "agent-workspace/builder-composer/output/task-004.md",
-  "flags":           ""
+  "_task_signal_example": {
+    "task_id":          "task-004",
+    "agent":            "builder-composer",
+    "status":           "done",
+    "phase":            "initial",
+    "_phase_values":    "initial | replan | fix | design — required, copy from manifest task",
+    "tokens_in":        2840,
+    "tokens_out":       1200,
+    "cost_usd":         0.0043,
+    "started":          "2024-01-15T14:23:00Z",
+    "completed":        "2024-01-15T14:24:12Z",
+    "duration_seconds": 72,
+    "output_file":      "agent-workspace/builder-composer/output/task-004.md",
+    "flags":            ""
+  },
+
+  "_cycle_rejected_example": {
+    "_filename": "cycle.rejected.json",
+    "_written_by": "architect",
+    "rejected_by": "architect",
+    "timestamp":   "ISO_TIMESTAMP",
+    "notes":       "Root cause summary",
+    "reason":      "quality | incomplete | wrong_approach | missing_contracts",
+    "new_tasks": [
+      {
+        "id":          "task-NNN",
+        "phase":       "fix",
+        "_phase_note": "always fix for cycle.rejected.json tasks — required",
+        "assigned_to": "builder-composer",
+        "status":      "pending",
+        "input":       "Fix: [specific description]. Files: [list]. Expected outcome: [what done looks like].",
+        "depends_on":  [],
+        "branch":      "agent/task-NNN-fix-description",
+        "output_file": null,
+        "review_gate": "architect",
+        "pr_url":      null
+      }
+    ]
+  },
+
+  "_design_rejected_example": {
+    "_filename": "design.rejected.json",
+    "_written_by": "design-guardian",
+    "rejected_by": "design-guardian",
+    "timestamp":   "ISO_TIMESTAMP",
+    "notes":       "Root cause summary of design violation",
+    "new_tasks": [
+      {
+        "id":          "task-NNN",
+        "phase":       "design",
+        "_phase_note": "always design for design.rejected.json tasks — required",
+        "assigned_to": "builder-composer",
+        "status":      "pending",
+        "input":       "Fix: [design violation description]. Reference DESIGN_SYSTEM.md section: [section].",
+        "depends_on":  [],
+        "branch":      "agent/task-NNN-design-fix",
+        "output_file": null,
+        "review_gate": "architect",
+        "pr_url":      null
+      }
+    ]
+  }
 }

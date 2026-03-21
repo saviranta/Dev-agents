@@ -120,7 +120,48 @@ If more than 20% of all tasks are assigned to `builder-generalist`: WARN — spe
 
 #### Schema protection
 
-- Any `builder-data` task whose `input` mentions `schema.prisma` must contain the phrase `SCHEMA_CHANGE_APPROVED_BY_USER`. If missing: BLOCK.
+- Any `builder-data` task whose `input` mentions `schema.prisma` must contain the phrase `SCHEMA_CHANGE_APPROVED_BY_LAURI`. If missing: BLOCK.
+
+---
+
+### Layer 3 — Dependency Graph and Agent Sequencing
+
+Build the full transitive dependency graph before running these checks. For each task, compute its complete ancestor set (all tasks reachable by following `depends_on` recursively).
+
+#### Cycle detection — BLOCK
+
+- The dependency graph must be a DAG. If any cycle exists, report all tasks involved and BLOCK. Do not attempt further sequencing checks until cycles are resolved.
+
+#### Sequencing invariants — BLOCK on any violation
+
+These rules encode the required execution order across agent roles. Violations mean an agent will attempt work before its prerequisites are complete.
+
+| Rule | Check |
+|---|---|
+| Every `reviewer` and `ui-reviewer` task must have at least one `builder-*` task in its ancestor set | BLOCK if missing |
+| Every `tester` task must have at least one `builder-*` task in its ancestor set | BLOCK if missing |
+| If the manifest contains any `reviewer` or `ui-reviewer` tasks, every `tester` task must have at least one `reviewer` or `ui-reviewer` in its ancestor set | BLOCK if missing — tester must not run before all reviews complete |
+| If the manifest contains any `ui-reviewer` tasks, every `tester` task must have at least one `ui-reviewer` in its ancestor set | BLOCK if missing |
+| Every `builder-*` task that has a UI/design scope (input mentions UI, component, page, layout, style, CSS, or design system) must have a `design-guardian` task in its ancestor set | BLOCK if missing (this is the transitive form of the Design Guardian gate above) |
+| Every `reviewer` and `ui-reviewer` task must have a `design-guardian` task in its ancestor set that itself has at least one `builder-*` task in its ancestor set | BLOCK if missing — the design-guardian that gates reviews must be the post-build wave (running after builders), not the pre-build approval wave |
+| `architect` tasks must not depend on any `builder-*`, `tester`, `reviewer`, or `ui-reviewer` task | BLOCK — architect must run before implementation |
+| `researcher` tasks must not depend on any `builder-*`, `tester`, `reviewer`, or `ui-reviewer` task | BLOCK — research must run before implementation |
+
+#### Implicit dependency detection — BLOCK on any violation
+
+If task B's `input` explicitly references another task's `output_file` value, task A (the owner of that `output_file`) must appear in task B's ancestor set. A reference without a declared dependency means task B may run before task A produces its output.
+
+- Scan every task's `input` for strings that match any `output_file` value declared elsewhere in the manifest.
+- For each match: verify the owning task is in the referencing task's ancestor set.
+- If not: BLOCK — `[task-B] references output of [task-A] but does not depend on it (directly or transitively)`.
+
+#### Dependency completeness — WARN on any violation
+
+These are softer checks for missing explicit linkages that are likely to cause confusion even if they do not break execution order.
+
+- A `reviewer` or `ui-reviewer` task whose `input` references the `output_file` of a `builder-*` task should have that builder as a **direct** `depends_on` entry (not merely transitive). If only transitive: WARN — `[task-R] depends on [task-B] only transitively; make it direct for clarity`.
+- A `tester` task should have every `reviewer` and `ui-reviewer` that covers the same feature scope as a **direct** `depends_on` entry. If only transitive: WARN — `[task-T] depends on [task-R] only transitively; make it direct for clarity`.
+- Any task whose ancestor set contains more than one `builder-*` task but whose `depends_on` list contains zero `builder-*` tasks directly: WARN — all builder dependencies are hidden behind intermediary tasks; consider making at least one direct.
 
 ---
 

@@ -41,6 +41,7 @@ Apply the combined discipline of all specialist builders:
 - No unsafe data operations (builder-data discipline)
 - Never modify files outside task scope
 - Run lint and build after changes
+- If the project uses TypeScript, run `tsc --noEmit` before writing output — a type error is a build failure; signal `failed`
 
 If the task clearly belongs to a specialist in hindsight, note it in output so Planner can improve future task splitting.
 

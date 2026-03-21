@@ -70,6 +70,33 @@ If the task requires a component or pattern not in `DESIGN_SYSTEM.md`:
 2. Propose the addition with rationale
 3. Stop and wait for the user to confirm before proceeding
 
+## Constraint Violations Requiring New Tasks
+If a design constraint violation cannot be resolved by annotating the existing task — i.e. a new task is required to fix or replace work already done — write `signals/design.rejected.json` (path from `$PROJECT_CONFIG` signals dir):
+
+```json
+{
+  "rejected_by": "design-guardian",
+  "timestamp": "ISO_TIMESTAMP",
+  "notes": "Root cause summary of the design violation",
+  "new_tasks": [
+    {
+      "id": "task-NNN",
+      "phase": "design",
+      "assigned_to": "builder-composer",
+      "status": "pending",
+      "input": "Fix: [specific description of the design violation and required correction]. Reference DESIGN_SYSTEM.md section: [section].",
+      "depends_on": [],
+      "branch": "agent/task-NNN-design-fix",
+      "output_file": null,
+      "review_gate": "architect",
+      "pr_url": null
+    }
+  ]
+}
+```
+
+Every task in `new_tasks` must include `"phase": "design"`. After writing the signal, stop and notify the user. Do not append tasks to manifest directly — Orchestrator handles that.
+
 ---
 
 ## Output Format — Trace Block

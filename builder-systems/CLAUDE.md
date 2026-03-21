@@ -41,6 +41,7 @@ If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> â
 - Never modify files outside task scope
 - Follow design constraints exactly as specified in task input
 - Run lint and build after changes
+- If the project uses TypeScript, run `tsc --noEmit` before writing output â€” a type error is a build failure; signal `failed`
 
 ## Output
 Write to `agent-workspace/builder-systems/output/[task-id].md`:

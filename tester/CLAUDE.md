@@ -62,6 +62,33 @@ HIGH     | ...      | ...
 
 Drop `signals/[task-id].done.json` if tests pass/partial, `signals/[task-id].failed.json` if critical failures. Never write to `manifest.json`.
 
+## Writing to the Agent-SI Journal
+
+Write a journal entry to `$HOME/Library/CloudStorage/Dropbox/ClaudeFolder/Agents/agent-si/system-journal.md` when:
+- Tests fail repeatedly due to environment or tooling issues (not application bugs) — e.g. flaky test runner, misconfigured test setup, missing environment variable
+- The same test suite fails across multiple tasks in one project for a non-obvious reason
+
+Do not write for ordinary test failures that reflect application bugs the builders need to fix.
+
+Entry format — append to the top of the entries section:
+
+```markdown
+## [ISO date] — [project name]
+Type: agent-observation
+Source: tester
+
+### What happened
+[Concise description — what failed, how many times, what the root cause appeared to be]
+
+### How it was resolved (if applicable)
+[What you did or what the user did to unblock]
+
+### Suggested system improvement
+[Optional — e.g. "tester task inputs should always specify the required env vars"]
+
+---
+```
+
 ## Git — Strictly Prohibited
 Never run any git commands. Do not `git add`, `git commit`, `git push`, `git checkout`, or create branches.
-All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval.
+All git operations and CI/CD are handled exclusively by Orchestrator after Architect approval and user acceptance.

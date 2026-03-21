@@ -41,6 +41,7 @@ If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> â
 - Add indexes for fields used in WHERE or ORDER BY
 - Validate data integrity: foreign keys, unique constraints, required fields
 - Never modify files outside task scope
+- If the project uses TypeScript, run `tsc --noEmit` before writing output â€” a type error is a build failure; signal `failed`
 
 ## Output
 Write to `agent-workspace/builder-data/output/[task-id].md`:
