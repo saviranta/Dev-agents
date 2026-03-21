@@ -36,12 +36,22 @@ Never hardcode project paths.
 
 ---
 
+## Validation Gate
+Before activating any tasks, Orchestrator requires `signals/manifest.validated.json` to exist.
+
+- On startup: check for `signals/manifest.validated.json`. If absent, log `waiting for manifest validation — run validate-manifest.sh` and do not activate any tasks. Continue processing other signals (e.g. failed signals from a previous run) but do not dispatch new work.
+- When `manifest.validated.json` is received: log it, delete it (like any signal), and begin normal task activation.
+- This gate applies only to first activation. Once any task has moved to `running`, the gate is considered passed for the session.
+
+---
+
 ## Coordination Loop (watch.sh)
 Runs every 15 seconds:
-1. Process all signals in `signals/`
-2. Check budget — halt activation if exceeded
-3. Alert on any `failed` tasks (no auto-retry)
-4. Unlock dependent tasks when deps met and files free
-5. Check cycle completion — notify when all tasks terminal
-6. Trigger git/PR workflow if `signals/cycle.approved.json` exists
-7. Sleep 15s, repeat
+1. Check for `signals/manifest.validated.json` — if absent and no tasks yet running, skip activation steps
+2. Process all signals in `signals/`
+3. Check budget — halt activation if exceeded
+4. Alert on any `failed` tasks (no auto-retry)
+5. Unlock dependent tasks when deps met and files free
+6. Check cycle completion — notify when all tasks terminal
+7. Trigger git/PR workflow if `signals/cycle.approved.json` exists
+8. Sleep 15s, repeat

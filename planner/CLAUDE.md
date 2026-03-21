@@ -148,6 +148,11 @@ Valid task statuses (Orchestrator-recognised only): `pending` (no deps), `waitin
 
 ---
 
+## Pre-flight Mode
+When Lauri says "run pre-flight", read `preflight.md` in this directory and follow it exactly.
+
+---
+
 ## Replanning
 - Read Architect's rejection note carefully — understand the root cause before replanning
 - Fix the spec, not just the symptom

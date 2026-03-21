@@ -40,14 +40,13 @@ if [ ! -f "$AGENTS_DIR/$AGENT/watch.sh" ]; then
   exit 1
 fi
 
-# ── Check API key (required for watcher agents) ───────────────────────────────
-if [ -f "$AGENTS_DIR/$AGENT/watch.sh" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
-  echo "❌ ANTHROPIC_API_KEY is not set."
-  echo "   Export it before launching: export ANTHROPIC_API_KEY=sk-ant-..."
+if ! command -v claude &>/dev/null; then
+  echo "❌ claude CLI not found. Install Claude Code: https://claude.ai/code"
   exit 1
 fi
 
 # ── Launch ────────────────────────────────────────────────────────────────────
+unset ANTHROPIC_API_KEY   # always use OAuth; API key mode uses launch-api-agent.sh
 export PROJECT_CONFIG=$(cat "$CONFIG_FILE")
 export AGENT_NAME="$AGENT"
 

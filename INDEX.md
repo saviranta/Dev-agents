@@ -10,6 +10,7 @@ Agents live globally here. Each project supplies its own `.agent-config.json` an
 | Agent | Type | Signal output | Role |
 |-------|------|---------------|------|
 | Planner | Interactive | — | PRD → task graph → manifest. Product-minded PO. |
+| Validator | Interactive | `manifest.validated.json` | Checks manifest for structural + content issues before Orchestrator activates tasks. |
 | Orchestrator | Background watcher | — | Signal processing, manifest writes, file locks, git/PRs |
 | Architect | Interactive | `cycle.approved.json` | Technical design upstream + quality gate downstream |
 | Researcher | Interactive | — | Explicit trigger only — external knowledge tasks |
@@ -91,6 +92,7 @@ Signal statuses:
 - `done` — builders, tester (pass)
 - `reviewed` — reviewer, ui-reviewer
 - `failed` — any agent on error
+- `manifest.validated.json` — Validator approval (gates Orchestrator task activation)
 - `cycle.approved.json` — Architect approval (special file)
 
 Signals folder should be empty between task completions. Accumulation means Orchestrator stopped.
@@ -208,10 +210,16 @@ Interactive agents (Planner, Architect, Design Guardian, Researcher) are always 
 `start-project.sh` prints one launch command per terminal tab (Claude Code runner by default).
 
 Startup order:
-1. Launch Orchestrator tab (background coordinator — must be running first)
-2. Run Planner → PRD + manifest.json
-3. Run Architect → ADR-phase-N.md + interface contracts
-4. Launch remaining watcher tabs
+1. Run pre-flight (resuming an existing session): `./shared/preflight.sh PROJECT_NAME`
+   - Planner audits state: resets stuck tasks, clears stale locks, archives orphaned signals
+   - Review report, address any failed tasks, then continue to step 4
+2. Launch Orchestrator tab (background coordinator — must be running first)
+3. Run Planner → PRD + manifest.json  _(new session only — skip if resuming)_
+4. Run Architect → ADR-phase-N.md + interface contracts  _(new session only — skip if resuming)_
+5. Run Validator → `./shared/validate-manifest.sh PROJECT_NAME`
+   - BLOCK items found: bring report to Planner, fix manifest, re-run Validator
+   - PASS: Validator drops `signals/manifest.validated.json`, Orchestrator begins activating tasks
+6. Launch remaining watcher tabs
 
 ---
 
@@ -295,6 +303,7 @@ Orchestrator saves trace content to `agent-workspace/decisions/[task-id]-trace.m
 ```
 Agents/
   planner/CLAUDE.md
+  validator/CLAUDE.md
   orchestrator/CLAUDE.md + watch.sh
   architect/CLAUDE.md
   researcher/CLAUDE.md
@@ -308,6 +317,8 @@ Agents/
   reviewer/CLAUDE.md + watch.sh + watch-api.sh
   ui-reviewer/CLAUDE.md + watch.sh + watch-api.sh
   shared/
+    preflight.sh        — runs Planner in pre-flight mode (state audit + correction)
+    validate-manifest.sh — runs the Validator agent against a project manifest
     launch-agent.sh     — launches a watcher agent (Claude Code CLI runner)
     launch-api-agent.sh — launches a watcher agent (Anthropic API runner)
     claude-api-runner.py — drop-in API replacement for `claude --print --output-format json`
