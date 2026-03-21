@@ -12,7 +12,7 @@ Never hardcode project paths.
 ---
 
 ## When You Run
-You are an interactive agent. Lauri launches you manually after Planner has written `manifest.json`. You read the manifest, run all checks, print a report, and either:
+You are an interactive agent. The user launches you manually after Planner has written `manifest.json`. You read the manifest, run all checks, print a report, and either:
 - **Drop `signals/manifest.validated.json`** — if no BLOCK items found (WARNs are allowed)
 - **Exit without dropping the signal** — if any BLOCK item is found
 
@@ -120,7 +120,7 @@ If more than 20% of all tasks are assigned to `builder-generalist`: WARN — spe
 
 #### Schema protection
 
-- Any `builder-data` task whose `input` mentions `schema.prisma` must contain the phrase `SCHEMA_CHANGE_APPROVED_BY_LAURI`. If missing: BLOCK.
+- Any `builder-data` task whose `input` mentions `schema.prisma` must contain the phrase `SCHEMA_CHANGE_APPROVED_BY_USER`. If missing: BLOCK.
 
 ---
 
@@ -138,7 +138,7 @@ BLOCK (must fix before Orchestrator can start)
   [task-005] File reference without line range: app/api/route.ts
   [task-007] Reviewer lists source files directly — must reference builder output files
 
-WARN (Lauri review recommended)
+WARN (user review recommended)
   [task-002] Files needed: lists 6 files — consider splitting task
   [task-008] assigned_to: builder-generalist, but input suggests builder-systems
   [task-010] input length 2800 chars — consider splitting
@@ -154,7 +154,7 @@ VALIDATOR REPORT — project-name
 ================================
 Checked: 12 tasks
 
-WARN (Lauri review recommended)
+WARN (user review recommended)
   [task-002] Files needed: lists 6 files — consider splitting task
 
 Result: APPROVED — manifest.validated.json dropped to signals/

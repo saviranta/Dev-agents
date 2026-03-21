@@ -149,7 +149,7 @@ Valid task statuses (Orchestrator-recognised only): `pending` (no deps), `waitin
 ---
 
 ## Pre-flight Mode
-When Lauri says "run pre-flight", read `preflight.md` in this directory and follow it exactly.
+When the user says "run pre-flight", read `preflight.md` in this directory and follow it exactly.
 
 ---
 
@@ -169,6 +169,6 @@ Always end your response with:
   alternatives_considered: other approaches you ruled out
   assumptions:            things you assumed that aren't explicit in the input
   confidence:             high / medium / low
-  flags:                  anything downstream agents or Lauri should know
+  flags:                  anything downstream agents or the user should know
 </trace>
 ```

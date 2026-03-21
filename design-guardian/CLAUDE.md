@@ -13,7 +13,7 @@ Never hardcode project paths.
 
 ## Every Session
 1. Read `DESIGN_SYSTEM.md` at the start — do not proceed without it
-2. If `DESIGN_SYSTEM.md` does not exist: stop and tell Lauri — do not invent a design system
+2. If `DESIGN_SYSTEM.md` does not exist: stop and tell the user — do not invent a design system
 3. Review the incoming UI task description
 4. Output a design-annotated task spec
 
@@ -68,7 +68,7 @@ Design Guardian writes `"status": "done"` when its output file is complete. Do n
 If the task requires a component or pattern not in `DESIGN_SYSTEM.md`:
 1. Flag it clearly — do not invent
 2. Propose the addition with rationale
-3. Stop and wait for Lauri to confirm before proceeding
+3. Stop and wait for the user to confirm before proceeding
 
 ---
 
@@ -81,6 +81,6 @@ Always end your response with:
   alternatives_considered: other approaches you ruled out
   assumptions:            things you assumed that aren't explicit in the input
   confidence:             high / medium / low
-  flags:                  anything downstream agents or Lauri should know
+  flags:                  anything downstream agents or the user should know
 </trace>
 ```

@@ -165,7 +165,7 @@ with open('$RUN_LOG', 'a') as f:
   OVER_BUDGET=$(python3 -c "print('yes' if float('$TOTAL_COST') >= float('$BUDGET') else 'no')")
 
   if [ "$OVER_BUDGET" = "yes" ] && [ "$BUDGET_HALTED" = "false" ]; then
-    echo "$(ts) 🚨 BUDGET EXHAUSTED — \$$TOTAL_COST / \$$BUDGET — task activation halted. Notify Lauri."
+    echo "$(ts) 🚨 BUDGET EXHAUSTED — \$$TOTAL_COST / \$$BUDGET — task activation halted. Notify user."
     BUDGET_HALTED=true
   elif [ "$OVER_ALERT" = "yes" ] && [ "$BUDGET_HALTED" = "false" ]; then
     echo "$(ts) ⚠️  Budget alert — \$$TOTAL_COST / \$$BUDGET spent"
@@ -275,7 +275,7 @@ PYEOF
     rm -f "$REJECTION"
   fi
 
-  # ── 6b. ARCHITECT APPROVAL — notify Lauri, PR raised by Planner ─────────────
+  # ── 6b. ARCHITECT APPROVAL — notify user, PR raised by Planner ──────────────
   APPROVAL="$SIGNALS/cycle.approved.json"
   if [ -f "$APPROVAL" ]; then
     echo "$(ts) ✅ Architect approval received — ask Planner to raise the PR"

@@ -32,7 +32,7 @@ Before each subsequent phase starts, Architect reviews whether anything in the n
 
 **Build phase:** Orchestrator activates tasks as dependencies clear. Builders write and run their own unit tests in the same invocation — a failing unit test signals `failed` immediately without waiting for a downstream tester. Once a composer task wires a feature together, the Tester (E2E), Reviewer, and UI Reviewer run in parallel. Architect acts as quality gate at the end of each cycle — approving or rejecting with structured feedback that feeds back to Planner.
 
-**PR workflow (manual):** When Architect approves a cycle, the Orchestrator prints a notification and waits. You then ask Planner to raise the PR — Planner runs `gh pr create` with a structured title and summary. PRs are never created automatically; Lauri always triggers them.
+**PR workflow (manual):** When Architect approves a cycle, the Orchestrator prints a notification and waits. You then ask Planner to raise the PR — Planner runs `gh pr create` with a structured title and summary. PRs are never created automatically; the user always triggers them.
 
 **13 agents across two types:**
 
@@ -188,7 +188,7 @@ INDEX.md             # Full reference documentation
 - Signal files are JSON written by agents and read by the Orchestrator — validate them if your task inputs come from untrusted sources
 - **Never put secrets in `.agent-config.json`** — it is read by background processes and its path pattern is gitignored, but treat it as a config file, not a vault
 - The framework does not make network requests beyond the Claude API (via the CLI) and GitHub API (via `gh`)
-- All file changes made by agents are visible via `git diff` before any PR is merged — the Architect review step and Lauri approval gate exist specifically to catch unwanted changes
+- All file changes made by agents are visible via `git diff` before any PR is merged — the Architect review step and user approval gate exist specifically to catch unwanted changes
 
 **Reporting issues:** open an issue at [github.com/saviranta/Dev-agents](https://github.com/saviranta/Dev-agents/issues)
 

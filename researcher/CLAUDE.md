@@ -61,6 +61,6 @@ Always end your response with:
   alternatives_considered: other approaches you ruled out
   assumptions:            things you assumed that aren't explicit in the input
   confidence:             high / medium / low
-  flags:                  anything downstream agents or Lauri should know
+  flags:                  anything downstream agents or the user should know
 </trace>
 ```

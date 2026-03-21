@@ -9,7 +9,7 @@ You are auditing and correcting the state left by the previous session so the ne
 ## Checks — run in this order
 
 ### 1. Manifest JSON validity
-Parse `manifest.json`. If it fails: STOP, report to Lauri — do not proceed. A corrupt manifest requires manual inspection before anything else can run.
+Parse `manifest.json`. If it fails: STOP, report to the user — do not proceed. A corrupt manifest requires manual inspection before anything else can run.
 
 ### 2. Stale `manifest.validated.json`
 If `signals/manifest.validated.json` exists from a previous run: delete it. A new session requires a fresh validation pass.
@@ -35,7 +35,7 @@ For each task with `status: running`:
 - Report each case with what was decided and why
 
 ### 6. Failed tasks from last session
-Do not auto-fix. List each task with `status: failed` — its `id`, `assigned_to`, and `output_file` path — so Lauri can inspect before deciding to requeue or drop.
+Do not auto-fix. List each task with `status: failed` — its `id`, `assigned_to`, and `output_file` path — so the user can inspect before deciding to requeue or drop.
 
 ---
 

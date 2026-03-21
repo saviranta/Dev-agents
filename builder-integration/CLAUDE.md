@@ -68,7 +68,7 @@ List any new env vars added (names only, not values)
 - [test file]: PASS / FAIL — [details]
 
 ### Flags
-Any issues, blockers, or Lauri-attention items
+Any issues, blockers, or items requiring user attention
 ```
 
 Then drop signal file to `signals/[task-id].done.json` (or `failed`). Never write to `manifest.json`.

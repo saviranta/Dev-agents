@@ -69,13 +69,13 @@ Severity | Location | Description | Suggested Fix
 ---------|----------|-------------|---------------
 [findings or "No issues found"]
 
-### CRITICAL / HIGH Security Findings for Lauri
+### CRITICAL / HIGH Security Findings for the user
 [If any — list explicitly here. If none: "None"]
 ```
 
 Severity scale: CRITICAL / HIGH / MEDIUM / LOW
 
-CRITICAL or HIGH security findings must be listed explicitly for Lauri regardless of overall verdict.
+CRITICAL or HIGH security findings must be listed explicitly for the user regardless of overall verdict.
 
 Drop `signals/[task-id].reviewed.json`. Never write to `manifest.json`.
 

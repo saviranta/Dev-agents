@@ -34,7 +34,7 @@ Agents live globally here. Each project supplies its own `.agent-config.json` an
 **Watchers never write to manifest** — they drop signal files only; Orchestrator processes signals and updates manifest.
 Builders are specialised by **cognitive mode**, not file location.
 **Generalist is a fallback** — if it's getting >20% of tasks, Planner's specs are too broad.
-**Autonomy decreases as consequence increases** — builders fully autonomous, merge always requires Lauri.
+**Autonomy decreases as consequence increases** — builders fully autonomous, merge always requires user.
 
 ---
 
@@ -75,7 +75,7 @@ Orchestrator
   → receives cycle.approved.json
   → opens PRs via gh pr create
 
-Lauri
+User
   → reviews CI + PR + reviewer reports
   → merges → GitHub Actions deploys
 ```
@@ -131,9 +131,9 @@ If >20% of tasks land on `builder-generalist`, task specs are too broad — spli
 |------|-------------|
 | Builder output quality | Architect (cycle approval) |
 | UI compliance | Architect (via UI Reviewer report) |
-| Security CRITICAL/HIGH | Lauri (flagged in Reviewer output) |
-| PR merge | Lauri always |
-| Deployment | Lauri always (triggered by merge) |
+| Security CRITICAL/HIGH | User (flagged in Reviewer output) |
+| PR merge | User always |
+| Deployment | User always (triggered by merge) |
 
 ---
 
@@ -154,7 +154,7 @@ Do not trigger for tasks answerable from the codebase.
 
 Required before any builder task that touches UI. Planner must insert a Design Guardian task in `depends_on` for every UI builder task.
 
-If `DESIGN_SYSTEM.md` does not exist for the project: Design Guardian stops and alerts Lauri.
+If `DESIGN_SYSTEM.md` does not exist for the project: Design Guardian stops and alerts the user.
 
 ---
 
@@ -251,7 +251,7 @@ Outputs: Agent | Tasks | Tokens In | Tokens Out | Cost USD
 ## Protected Files Policy
 
 These files require explicit approval flags in the task spec before a builder may touch them:
-- `schema.prisma` — requires `SCHEMA_CHANGE_APPROVED_BY_LAURI` in task input
+- `schema.prisma` — requires `SCHEMA_CHANGE_APPROVED_BY_USER` in task input
 - `.env.example` — list in `git.protected_files` in config
 - `package.json`, `package-lock.json` — list in `git.protected_files` in config
 
@@ -290,7 +290,7 @@ Planner, Architect, Researcher, and Design Guardian end every response with:
   alternatives_considered: other approaches you ruled out
   assumptions:            things you assumed that aren't explicit in the input
   confidence:             high / medium / low
-  flags:                  anything downstream agents or Lauri should know
+  flags:                  anything downstream agents or the user should know
 </trace>
 ```
 

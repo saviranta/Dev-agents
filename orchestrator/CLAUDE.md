@@ -18,14 +18,14 @@ Never hardcode project paths.
 - Manages file locks in `locked_files` — assigns on task activation, releases on signal receipt
 - Monitors budget — alerts at threshold, halts task activation when exhausted
 - Triggers git/PR workflow only when Architect approval signal received (`signals/cycle.approved.json`)
-- Alerts Planner and Lauri when tasks fail — does not replan itself
+- Alerts Planner and user when tasks fail — does not replan itself
 - Never touches protected files directly — only manages git/PR shell commands
 
 ## What This Agent Does NOT Do
 - Plan or decompose tasks
 - Make judgment calls about code quality
 - Auto-retry failed tasks
-- Merge PRs — that is always Lauri
+- Merge PRs — that is always the user
 
 ---
 

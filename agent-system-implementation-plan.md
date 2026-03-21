@@ -39,7 +39,7 @@ This is the definitive agent list. Do not create agents outside this list withou
 - **Watchers never write to manifest** — they drop signal files only; Orchestrator processes signals and updates manifest
 - Builders specialised by **cognitive mode**, not file location
 - Generalist builder kept as explicit fallback
-- Autonomy decreases as consequence increases: builders fully autonomous, merge always requires Lauri
+- Autonomy decreases as consequence increases: builders fully autonomous, merge always requires user
 
 ---
 
@@ -385,7 +385,7 @@ Create `$CF/ClaudeCodeRepo/agents/manifest-template.json`.
       "id": "task-003",
       "assigned_to": "builder-data",
       "status": "pending",
-      "input": "Add [table/migration/query]. Schema spec: [fields, types, constraints, indexes]. Reference ADR.md. schema.prisma may only be modified with explicit Lauri approval in this spec.",
+      "input": "Add [table/migration/query]. Schema spec: [fields, types, constraints, indexes]. Reference ADR.md. schema.prisma may only be modified with explicit the user approval in this spec.",
       "depends_on": [],
       "branch": "agent/task-003-data-layer",
       "output_file": null,
@@ -429,7 +429,7 @@ Create `$CF/ClaudeCodeRepo/agents/manifest-template.json`.
       "id": "task-007",
       "assigned_to": "reviewer",
       "status": "waiting",
-      "input": "Review code from tasks 002–004 for quality and security. Flag CRITICAL/HIGH security findings for Lauri.",
+      "input": "Review code from tasks 002–004 for quality and security. Flag CRITICAL/HIGH security findings for the user.",
       "depends_on": ["task-004"],
       "branch": "agent/task-004-feature-name",
       "output_file": null,
@@ -501,7 +501,7 @@ The script runs a loop every 15 seconds:
 2. CHECK BUDGET
    - Sum cost_usd in run-log.jsonl
    - If total >= budget_alert_at: print warning and stop launching new tasks
-   - If total >= budget_usd: stop all task activation, notify Lauri
+   - If total >= budget_usd: stop all task activation, notify the user
 
 3. CHECK FOR FAILURES
    - If any task status is 'failed': print alert with task_id and agent
@@ -521,7 +521,7 @@ The script runs a loop every 15 seconds:
 
 6. GIT / PR WORKFLOW (triggered by Architect approval signal)
    - Verify task branches are clean against main
-   - If conflicts: alert Lauri, do not proceed
+   - If conflicts: alert the user, do not proceed
    - For clean branches: gh pr create with task context + reviewer findings
    - Update manifest pr_url fields
    - Print PR URLs
@@ -632,7 +632,7 @@ Role: Pure coordination engine. Runs continuously as a background watcher. Never
 - Manages file locks in locked_files — assigns on task activation, releases on signal receipt
 - Monitors budget — alerts when threshold exceeded, halts task activation when budget hit
 - Triggers git/PR workflow only when Architect approval signal received
-- Alerts Planner and Lauri when tasks fail — does not replan itself
+- Alerts Planner and the user when tasks fail — does not replan itself
 - Never touches protected files directly — only manages the git/PR commands
 
 This agent has no interactive mode. It runs watch.sh continuously and does not need a CLAUDE.md for interactive sessions. Its coordination logic lives entirely in watch.sh.
@@ -712,8 +712,8 @@ Role: Design system owner. Runs before any builder task that touches UI. Adds de
 - Read `DESIGN_SYSTEM.md` at the start of every session
 - Review incoming UI task description
 - Output design-annotated task spec: which components, which tokens, spacing, typography, applicable patterns
-- If task requires a new component or pattern not in design system: flag it, propose addition, stop until Lauri confirms
-- If `DESIGN_SYSTEM.md` does not exist: stop and tell Lauri — do not invent a design system
+- If task requires a new component or pattern not in design system: flag it, propose addition, stop until the user confirms
+- If `DESIGN_SYSTEM.md` does not exist: stop and tell the user — do not invent a design system
 - End every session with a `<trace>` block
 
 ---
@@ -756,7 +756,7 @@ Role: Create reusable primitives — components, services, utilities — that co
 Role: Schema, migrations, queries, data access layer. Highest-risk builder — smallest scope, strictest rules.
 
 - Read `ADR.md` at session start — follow data shape decisions exactly
-- `schema.prisma` is a protected file — only modify if task spec contains explicit `SCHEMA_CHANGE_APPROVED_BY_LAURI` flag
+- `schema.prisma` is a protected file — only modify if task spec contains explicit `SCHEMA_CHANGE_APPROVED_BY_USER` flag
 - Migrations must be safe: never destructive without explicit `DESTRUCTIVE_APPROVED` flag in task input
 - Never raw SQL unless explicitly required — use data access layer
 - Always consider query performance: no N+1 patterns, add indexes for fields used in WHERE or ORDER BY
@@ -832,7 +832,7 @@ Role: Combined code quality and security review. Output gates via Architect.
 
 **Output format:** Two-section report (Code Quality, Security). Each finding: severity (CRITICAL / HIGH / MEDIUM / LOW), location, description, suggested fix. Overall verdict: PASS / NEEDS_CHANGES / FAIL.
 
-CRITICAL or HIGH security findings flagged explicitly for Lauri regardless of overall verdict.
+CRITICAL or HIGH security findings flagged explicitly for the user regardless of overall verdict.
 
 Write output to `output/[task-id].md` then drop `[task-id].reviewed.json` signal.
 
@@ -866,7 +866,7 @@ Always end your response with:
   alternatives_considered: other approaches you ruled out
   assumptions: things you assumed that aren't explicit in the input
   confidence: high / medium / low
-  flags: anything downstream agents or Lauri should know
+  flags: anything downstream agents or the user should know
 </trace>
 ```
 
@@ -883,7 +883,7 @@ Written by Orchestrator only. Append-only. One JSON line per processed signal.
 Schema: `{ task_id, agent, model, started, completed, duration_seconds, status, tokens_in, tokens_out, cost_usd, project }`
 
 ### `agent-workspace/quality-log.json`
-Human-maintained. Updated by Lauri or Architect after reviewing output.
+Human-maintained. Updated by the user or Architect after reviewing output.
 Schema per entry: `{ task_id, agent, model, score, issue, root_cause, fix_applied }`
 Score: 1 = needs redo, 2 = acceptable, 3 = good. Patterns drive future CLAUDE.md improvements.
 
@@ -931,7 +931,7 @@ jobs:
         run: echo "Add deploy command here"
 ```
 
-Orchestrator opens PRs. GitHub Actions runs CI on PR. Lauri reviews CI + reviewer reports + PR description, then merges. Deployment triggers on merge to main.
+Orchestrator opens PRs. GitHub Actions runs CI on PR. the user reviews CI + reviewer reports + PR description, then merges. Deployment triggers on merge to main.
 
 Agents never merge. Agents never deploy. These are always human-triggered.
 
@@ -1013,7 +1013,7 @@ Create `$CF/ClaudeCodeRepo/agents/INDEX.md` documenting:
 - Planner vs Orchestrator distinction — what each owns
 - Architect two-mode explanation (design upstream, quality gate downstream)
 - Full task flow diagram:
-  `Planner → manifest → Architect (ADR) → Orchestrator activates tasks → Design Guardian → builder-systems + builder-data (parallel) → builder-integration → builder-composer → Tester + UI Reviewer (parallel) → Reviewer → Architect gate → Orchestrator PR → Lauri merges → GitHub Actions deploys`
+  `Planner → manifest → Architect (ADR) → Orchestrator activates tasks → Design Guardian → builder-systems + builder-data (parallel) → builder-integration → builder-composer → Tester + UI Reviewer (parallel) → Reviewer → Architect gate → Orchestrator PR → the user merges → GitHub Actions deploys`
 - Signal file schema and lifecycle (written by watcher, processed+deleted by Orchestrator)
 - Manifest ownership rule: Orchestrator only
 - Builder specialisation decision tree
@@ -1045,7 +1045,7 @@ After implementation, verify:
 - [ ] Watcher drops signal file to signals/ — does NOT write to manifest
 - [ ] Orchestrator processes signal: updates manifest status, releases file locks, appends run-log.jsonl, deletes signal
 - [ ] Two builder-composer instances pick up different tasks without conflict (no flock needed — Orchestrator serialises activation)
-- [ ] builder-data refuses to touch schema.prisma without SCHEMA_CHANGE_APPROVED_BY_LAURI flag
+- [ ] builder-data refuses to touch schema.prisma without SCHEMA_CHANGE_APPROVED_BY_USER flag
 - [ ] Budget alert triggers when threshold exceeded — Orchestrator stops activating new tasks
 - [ ] Failed task alert printed by Orchestrator — no auto-retry
 - [ ] Reviewer and UI Reviewer drop `reviewed` signals, not `done`
@@ -1054,7 +1054,7 @@ After implementation, verify:
 - [ ] `cost-report.sh flat_value` outputs correct totals by agent
 - [ ] Trace blocks saved to decisions/ folder
 - [ ] GitHub Actions CI runs on PR open
-- [ ] Deployment does not trigger until Lauri merges
+- [ ] Deployment does not trigger until the user merges
 
 ---
 

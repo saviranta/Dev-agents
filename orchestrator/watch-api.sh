@@ -165,7 +165,7 @@ with open('$RUN_LOG', 'a') as f:
   OVER_BUDGET=$(python3 -c "print('yes' if float('$TOTAL_COST') >= float('$BUDGET') else 'no')")
 
   if [ "$OVER_BUDGET" = "yes" ] && [ "$BUDGET_HALTED" = "false" ]; then
-    echo "$(ts) 🚨 BUDGET EXHAUSTED — \$$TOTAL_COST / \$$BUDGET — task activation halted. Notify Lauri."
+    echo "$(ts) 🚨 BUDGET EXHAUSTED — \$$TOTAL_COST / \$$BUDGET — task activation halted. Notify user."
     BUDGET_HALTED=true
   elif [ "$OVER_ALERT" = "yes" ] && [ "$BUDGET_HALTED" = "false" ]; then
     echo "$(ts) ⚠️  Budget alert — \$$TOTAL_COST / \$$BUDGET spent"
@@ -300,7 +300,7 @@ for branch in branches:
 
     # Open PR
     task_ids = [t['id'] for t in m['tasks'] if t.get('branch') == branch]
-    body = f"Agent-generated PR\\n\\nTasks: {', '.join(task_ids)}\\n\\nReviewed by Architect. Merge requires Lauri approval."
+    body = f"Agent-generated PR\\n\\nTasks: {', '.join(task_ids)}\\n\\nReviewed by Architect. Merge requires user approval."
     pr_result = subprocess.run(
         ['gh', 'pr', 'create',
          '--title', f'[agent] {branch}',

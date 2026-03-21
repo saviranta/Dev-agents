@@ -34,7 +34,7 @@ Read ONLY the files listed under `Files needed:` in your task input. Do not Read
 If you need a file not listed in `Files needed:`, write `BLOCKED: needs <file> — not in task spec` and signal `failed`. Do not explore the codebase.
 
 ## Rules — Non-Negotiable
-- **`schema.prisma` is a protected file** — only modify if task input contains the exact flag: `SCHEMA_CHANGE_APPROVED_BY_LAURI`
+- **`schema.prisma` is a protected file** — only modify if task input contains the exact flag: `SCHEMA_CHANGE_APPROVED_BY_USER`
 - **Migrations must be safe** — never destructive without explicit `DESTRUCTIVE_APPROVED` flag in task input
 - Never raw SQL unless explicitly required — use data access layer
 - No N+1 patterns — always check query efficiency
@@ -64,7 +64,7 @@ Indexes added, query patterns, potential N+1 risks addressed
 - [test file]: PASS / FAIL — [details]
 
 ### Flags
-Any issues, blockers, schema changes that need Lauri review
+Any issues, blockers, schema changes that need user review
 ```
 
 Then drop signal file to `signals/[task-id].done.json` (or `failed`). Never write to `manifest.json`.
