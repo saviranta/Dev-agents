@@ -95,6 +95,8 @@ Do not jump to solutions. Reason from the data: what pattern in the journal or b
 **Step 3 — Write RFC**
 Determine the next RFC number by reading `$CF/Agents/agent-si/rfcs/` (or RFC-001 if empty).
 
+Follow the guidance in `$CF/Agents/agent-si/rfcs/RFC-GUIDE.md` for how to write a good RFC.
+
 Write to `$CF/Agents/agent-si/rfcs/RFC-NNN.md`:
 
 ```markdown
@@ -135,6 +137,17 @@ Do not implement until the user approves.
 **Step 5 — Implement on approval**
 Make the changes to the relevant files. Commit with message: `RFC-NNN: [short title]`
 
+Append an implementation section to the RFC file:
+
+```markdown
+### Implementation — [date]
+Changed: [exact files edited and what was changed]
+Committed: [commit hash, or "manual"]
+Notes: [anything that deviated from the proposed change, or "none"]
+```
+
+Update the RFC status to `implemented`.
+
 **Step 6 — Write journal entry**
 
 ```markdown
@@ -142,7 +155,7 @@ Make the changes to the relevant files. Commit with message: `RFC-NNN: [short ti
 Type: improvement
 
 ### Change
-[What was changed and in which files]
+RFC-NNN — see RFC file for implementation details.
 
 ### Metric targets set
 [From RFC metrics table]
@@ -152,8 +165,6 @@ Type: improvement
 
 ---
 ```
-
-Update the RFC status to `implemented`.
 
 ---
 

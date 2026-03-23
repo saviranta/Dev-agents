@@ -80,22 +80,64 @@ sys.exit(1)
   python3 -c "import json; open('$STATUS_DIR/$AGENT.json','w').write(json.dumps({'agent':'$AGENT','status':'running','task_id':'$TASK_ID','started':'$START_TIME','input_preview':$INPUT_PREVIEW}))"
 
   RESPONSE_FILE="/tmp/${AGENT}-${TASK_ID}-response.json"
+  STREAM_FILE="/tmp/${AGENT}-${TASK_ID}-stream.jsonl"
   ERROR_FILE="/tmp/${AGENT}-${TASK_ID}-error.txt"
 
   SAFE_INPUT=$(printf '<task id="%s">\n%s\n</task>' "$TASK_ID" "$TASK_INPUT")
-  echo "$SAFE_INPUT" | claude \
+
+  # Real-time turn counter — warns past 15-turn soft limit (no hard stop)
+  > "$STREAM_FILE"
+  touch "$STREAM_FILE.running"
+  (
+    LAST_TURNS=0; TURN_LIMIT=15
+    while [ -f "$STREAM_FILE.running" ]; do
+      sleep 5
+      CUR_TURNS=$(grep -c '"type":"assistant"' "$STREAM_FILE" 2>/dev/null || echo 0)
+      if [ "$CUR_TURNS" -gt "$LAST_TURNS" ] && [ "$CUR_TURNS" -gt "$TURN_LIMIT" ]; then
+        OVER=$((CUR_TURNS - TURN_LIMIT))
+        echo "$(ts) ⚠️  $TASK_ID — turn $CUR_TURNS (+$OVER over ${TURN_LIMIT})"
+      fi
+      LAST_TURNS=$CUR_TURNS
+    done
+  ) &
+  COUNTER_PID=$!
+
+  (cd "$PROJECT_ROOT" && echo "$SAFE_INPUT" | claude \
     --model "$MODEL" \
     --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
-    --max-turns 15 \
-    --print --output-format json \
-    > "$RESPONSE_FILE" 2>"$ERROR_FILE"
+    --verbose --print --output-format stream-json \
+    2>"$ERROR_FILE") > "$STREAM_FILE"
   CLAUDE_EXIT=$?
+
+  rm -f "$STREAM_FILE.running"
+  kill $COUNTER_PID 2>/dev/null
+  wait $COUNTER_PID 2>/dev/null
+
+  # Extract result and usage from stream
+  python3 << PYEOF
+import json
+result_data = {}
+try:
+    with open("$STREAM_FILE") as f:
+        for line in f:
+            line = line.strip()
+            if not line: continue
+            try:
+                event = json.loads(line)
+                if event.get("type") == "result":
+                    result_data = event
+            except: pass
+except: pass
+with open("$RESPONSE_FILE", "w") as f:
+    json.dump({"result": result_data.get("result", ""), "usage": result_data.get("usage", {}), "is_error": result_data.get("is_error", True)}, f)
+PYEOF
 
   END_EPOCH=$(date +%s)
   DURATION=$((END_EPOCH - START_EPOCH))
   COMPLETED=$(ts)
 
-  if [ $CLAUDE_EXIT -ne 0 ] || [ ! -s "$RESPONSE_FILE" ]; then
+  IS_ERROR=$(python3 -c "import json; print(json.load(open('$RESPONSE_FILE')).get('is_error', True))" 2>/dev/null || echo "True")
+  if [ $CLAUDE_EXIT -ne 0 ] || [ "$IS_ERROR" = "True" ]; then
     ERROR_MSG=$(head -5 "$ERROR_FILE" 2>/dev/null)
     cat > "$OUTPUT_DIR/${TASK_ID}.md" << EOF
 # $TASK_ID — FAILED

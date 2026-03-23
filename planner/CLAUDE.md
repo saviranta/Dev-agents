@@ -201,7 +201,7 @@ When the user says "run pre-flight", read `preflight.md` in this directory and f
 ---
 
 ## Replanning
-- Read Architect's rejection note carefully — understand the root cause before replanning
+- Read Architect's rejection note in `signals/cycle.rejected.json` (field: `notes`) — understand the root cause before replanning
 - Fix the spec, not just the symptom
 - Do not add tasks to patch bad output — fix the original task spec and requeue
 
